@@ -1,0 +1,319 @@
+---
+title: "TCGA_LAML_chimera_gene_counts.Rmd"
+author: "Kristen Dang"
+date: "December 9, 2015"
+output: html_document
+---
+
+```{r}
+library('edgeR')
+library(biomaRt)
+library(synapseClient)
+synapseLogin()
+```
+
+Get non-chimeric gene counts
+```{r}
+dataEnt = synGet("syn5548512")
+data = read.delim(getFileLocation(dataEnt), header = TRUE, row.names = 1)
+head(data)
+
+idKeyEnt = synGet("syn5548599")
+idKey = read.delim(getFileLocation(idKeyEnt))
+idKey$mainID = substr(idKey$barcode,start = 9, stop = 12)
+head(idKey)
+
+# Figure out which samples have more than one data file
+colnames(data)
+tmp = gsub("X", "", colnames(data))
+adjustedColnames = gsub("\\.", "-", tmp)
+sampCounts = table(idKey$mainID[which(as.character(idKey$analysis_id) %in% adjustedColnames)])
+toMerge = names(sampCounts)[which(sampCounts > 1)]
+
+sumReplicates=function(sampName){
+  filesToMerge = as.character(idKey$analysis_id[which(idKey$mainID == sampName)])
+  colsToMerge = which(adjustedColnames %in% filesToMerge)
+  return(apply(X = data[,colsToMerge],MARGIN = 1,FUN = sum))
+}
+
+# Sum the data in cases where a sample has more than one file.
+summedCounts = sapply(as.list(toMerge),sumReplicates)
+dim(summedCounts)
+head(summedCounts)
+colnames(summedCounts) = toMerge
+
+# Change the names of the other data to be the sample id.
+toChangeName = names(sampCounts)[which(sampCounts == 1)]
+toChangeNameAID = as.character(idKey$analysis_id[which(idKey$mainID %in% toChangeName)])
+oneFileData = data[,which(adjustedColnames %in% toChangeNameAID)]
+tmp = gsub("X", "", colnames(oneFileData))
+adjustedColnames = gsub("\\.", "-", tmp)
+colnames(oneFileData) = idKey$mainID[match(adjustedColnames, idKey$analysis_id)]
+head(oneFileData)
+
+# Merge the two pieces of data.
+nchimericMergedData = cbind(oneFileData, summedCounts)
+nchimeric.dge = DGEList(nchimericMergedData, remove.zeros = TRUE)
+head(getCounts(nchimeric.dge))
+```
+
+
+Get gene pairs
+```{r}
+validationEnt = synGet("syn5260057")
+validation = read.csv(getFileLocation(validationEnt))
+head(validation)
+z = which(colnames(validation) %in% c("X2930", "X3001"))
+validation = validation[,-z]
+allHCNGs = unlist(strsplit(as.character(validation$TCGA.ID),split = "-"))
+fusionPairs = matrix(allHCNGs,nrow = length(allHCNGs)/2,ncol = 2, byrow = TRUE)
+head(fusionPairs)
+
+symbolCheckEnt = synGet("syn5548535")
+symbolCheck = read.delim(getFileLocation(symbolCheckEnt))
+x = as.character(symbolCheck$Approved.symbol[match(toupper(fusionPairs[,1]),toupper(symbolCheck$Input))])
+tmp = cbind(fusionPairs, x)
+y = as.character(symbolCheck$Approved.symbol[match(toupper(fusionPairs[,2]),toupper(symbolCheck$Input))])
+fusionPairsUpdated = cbind(tmp,y)
+head(fusionPairsUpdated)
+
+Hs=useMart("ENSEMBL_MART_ENSEMBL", host="www.ensembl.org") # use this one when biomart.org is down
+Hs = useDataset("hsapiens_gene_ensembl", Hs)
+
+fusionPairsENSG = matrix(NA,nrow = nrow(fusionPairs),ncol = 10)
+x = getBM(attributes=c("hgnc_symbol","ensembl_gene_id", "chromosome_name", "start_position", "end_position"),filters="hgnc_symbol",values=toupper(fusionPairsUpdated[,3]), mart=Hs)    
+fusionPairsENSG[,1] = toupper(fusionPairsUpdated[,3])
+fusionPairsENSG = as.data.frame(fusionPairsENSG)
+fusionPairsENSG[,2:5] = x[match(fusionPairsENSG[,1],x$hgnc_symbol),2:5]
+x = getBM(attributes=c("hgnc_symbol","ensembl_gene_id", "chromosome_name", "start_position", "end_position"),filters="hgnc_symbol",values=toupper(fusionPairsUpdated[,4]), mart=Hs)    
+fusionPairsENSG[,6] = toupper(fusionPairsUpdated[,4])
+fusionPairsENSG[,7:10] = x[match(fusionPairsENSG[,6],x$hgnc_symbol),2:5]
+head(fusionPairsENSG)
+
+completePairs = na.omit(fusionPairsENSG)
+
+```
+
+
+Get chimeric (and fractional allocation) gene counts
+```{r}
+cdataEnt = synGet("syn5548501")
+cdata = read.delim(getFileLocation(cdataEnt), header = TRUE, row.names = 1)
+head(cdata)
+
+
+# Figure out which samples have more than one cdata file
+colnames(cdata)
+tmp = gsub("X", "", colnames(cdata))
+adjustedColnames = substr(gsub("\\.", "-", tmp),start = 1,stop = 36)
+sampCounts = table(idKey$mainID[which(as.character(idKey$analysis_id) %in% adjustedColnames)])
+toMerge = names(sampCounts)[which(sampCounts > 1)]
+
+sumReplicates=function(sampName){
+  filesToMerge = as.character(idKey$analysis_id[which(idKey$mainID == sampName)])
+  colsToMerge = which(adjustedColnames %in% filesToMerge)
+  return(apply(X = cdata[,colsToMerge],MARGIN = 1,FUN = sum))
+}
+
+# Sum the cdata in cases where a sample has more than one file.
+summedCounts = sapply(as.list(toMerge),sumReplicates)
+dim(summedCounts)
+head(summedCounts)
+colnames(summedCounts) = toMerge
+
+# Change the names of the other cdata to be the sample id.
+toChangeName = names(sampCounts)[which(sampCounts == 1)]
+toChangeNameAID = as.character(idKey$analysis_id[which(idKey$mainID %in% toChangeName)])
+oneFileData = cdata[,which(adjustedColnames %in% toChangeNameAID)]
+tmp = gsub("X", "", colnames(oneFileData))
+adjustedColnames = substr(gsub("\\.", "-", tmp),start = 1,stop = 36)
+colnames(oneFileData) = idKey$mainID[match(adjustedColnames, idKey$analysis_id)]
+head(oneFileData)
+
+# Merge the two pieces of cdata.
+chimericMergedData = cbind(oneFileData, summedCounts)
+chimeric.dge = DGEList(chimericMergedData, remove.zeros = TRUE)
+head(getCounts(chimeric.dge))
+```
+
+TP non-chimeric counts
+```{r}
+TPcounts = 0
+for (i in 1:nrow(validation)){ TPcounts[i] = length(which(validation[i,5:82] %in% c(1,2))) }
+
+FPcounts = 0
+for (i in 1:nrow(validation)){ FPcounts[i] = length(which(validation[i,5:82] %in% c(0))) }
+
+TPdonor = validation[,4:82]
+TPdonor[,1] = fusionPairsENSG[,2]
+tmp = gsub("X", "", colnames(TPdonor))
+adjustedColnames_tp = substr(gsub("\\.", "-", tmp),start = 1,stop = 36)
+TPdonorCounts = matrix(NA, nrow = nrow(TPdonor), ncol = (ncol(TPdonor)-1),)
+rownames(TPdonorCounts) = TPdonor[,1]
+colnames(TPdonorCounts) = adjustedColnames_tp[2:length(adjustedColnames_tp)]
+head(TPdonorCounts)
+
+nchimeric.cpm = cpm(nchimeric.dge)
+
+for (i in 1:nrow(TPdonor)) {
+  geneRow = which(rownames(nchimeric.cpm) == TPdonor[i,1])
+  if (length(geneRow) < 1) { next }
+  geneSamps = gsub("X", "", colnames(TPdonor)[which(TPdonor[i,] %in% c(1,2))])
+  geneData = nchimeric.cpm[geneRow,which(colnames(nchimeric.cpm) %in% geneSamps)]
+  names(geneData) = colnames(nchimeric.cpm)[which(colnames(nchimeric.cpm) %in% geneSamps)]
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) > 1) {
+    replaceVals = geneData[na.omit(match(adjustedColnames_tp,names(geneData)))]
+  }
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) == 1) {
+    replaceVals = geneData }
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) < 1) {next}
+  inputPositions = which(TPdonor[i,] %in% c(1,2))
+  names(inputPositions) = gsub("X","",colnames(TPdonor)[which(TPdonor[i,] %in% c(1,2))])
+  toRemove = which(!names(inputPositions) %in% names(geneData))
+  matchingInputPositions = inputPositions[-toRemove]
+  
+  if (length(replaceVals) > 1) {
+    TPdonorCounts[i,matchingInputPositions] = as.vector(t(replaceVals))
+  }
+  else { TPdonorCounts[i,matchingInputPositions] = as.vector(t(replaceVals)) }
+}
+head(TPdonorCounts)
+boxplot(as.vector(TPdonorCounts))
+
+
+
+### TP Acceptor counts
+TPacceptor = validation[,4:82]
+TPacceptor[,1] = fusionPairsENSG[,7]
+tmp = gsub("X", "", colnames(TPacceptor))
+adjustedColnames_tp = substr(gsub("\\.", "-", tmp),start = 1,stop = 36)
+TPacceptorCounts = matrix(NA, nrow = nrow(TPacceptor), ncol = (ncol(TPacceptor)-1),)
+rownames(TPacceptorCounts) = TPacceptor[,1]
+colnames(TPacceptorCounts) = adjustedColnames_tp[2:length(adjustedColnames_tp)]
+head(TPacceptorCounts)
+
+
+for (i in 1:nrow(TPacceptor)) {
+  geneRow = which(rownames(nchimeric.cpm) == TPacceptor[i,1])
+  if (length(geneRow) < 1) { next }
+  geneSamps = gsub("X", "", colnames(TPacceptor)[which(TPacceptor[i,] %in% c(1,2))])
+  geneData = nchimeric.cpm[geneRow,which(colnames(nchimeric.cpm) %in% geneSamps)]
+  names(geneData) = colnames(nchimeric.cpm)[which(colnames(nchimeric.cpm) %in% geneSamps)]
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) > 1) {
+    replaceVals = geneData[na.omit(match(adjustedColnames_tp,names(geneData)))]
+  }
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) == 1) {
+    replaceVals = geneData }
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) < 1) {next}
+  inputPositions = which(TPacceptor[i,] %in% c(1,2))
+  names(inputPositions) = gsub("X","",colnames(TPacceptor)[which(TPacceptor[i,] %in% c(1,2))])
+  toRemove = which(!names(inputPositions) %in% names(geneData))
+  matchingInputPositions = inputPositions[-toRemove]
+  
+  if (length(replaceVals) > 1) {
+    TPacceptorCounts[i,matchingInputPositions] = as.vector(t(replaceVals))
+  }
+  else { TPacceptorCounts[i,matchingInputPositions] = as.vector(t(replaceVals)) }
+}
+head(TPacceptorCounts)
+boxplot(as.vector(TPacceptorCounts))
+```
+
+
+
+
+
+TP chimera  counts
+```{r}
+TPcounts = 0
+for (i in 1:nrow(validation)){ TPcounts[i] = length(which(validation[i,5:82] %in% c(1,2))) }
+
+FPcounts = 0
+for (i in 1:nrow(validation)){ FPcounts[i] = length(which(validation[i,5:82] %in% c(0))) }
+
+TPdonorChimera = validation[,4:82]
+TPdonorChimera[,1] = fusionPairsENSG[,2]
+tmp = gsub("X", "", colnames(TPdonorChimera))
+adjustedColnames_tp = substr(gsub("\\.", "-", tmp),start = 1,stop = 36)
+TPdonorCountsChimera = matrix(NA, nrow = nrow(TPdonorChimera), ncol = (ncol(TPdonorChimera)-1),)
+rownames(TPdonorCountsChimera) = TPdonorChimera[,1]
+colnames(TPdonorCountsChimera) = adjustedColnames_tp[2:length(adjustedColnames_tp)]
+head(TPdonorCountsChimera)
+
+chimeric.cpm = cpm(chimeric.dge)
+
+for (i in 1:nrow(TPdonorChimera)) {
+  geneRow = which(rownames(chimeric.cpm) == TPdonorChimera[i,1])
+  if (length(geneRow) < 1) { next }
+  geneSamps = gsub("X", "", colnames(TPdonorChimera)[which(TPdonorChimera[i,] %in% c(1,2))])
+  geneData = chimeric.cpm[geneRow,which(colnames(chimeric.cpm) %in% geneSamps)]
+  names(geneData) = colnames(chimeric.cpm)[which(colnames(chimeric.cpm) %in% geneSamps)]
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) > 1) {
+    replaceVals = geneData[na.omit(match(adjustedColnames_tp,names(geneData)))]
+  }
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) == 1) {
+    replaceVals = geneData }
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) < 1) {next}
+  inputPositions = which(TPdonorChimera[i,] %in% c(1,2))
+  names(inputPositions) = gsub("X","",colnames(TPdonorChimera)[which(TPdonorChimera[i,] %in% c(1,2))])
+  toRemove = which(!names(inputPositions) %in% names(geneData))
+  matchingInputPositions = inputPositions[-toRemove]
+  
+  if (length(replaceVals) > 1) {
+    TPdonorCountsChimera[i,matchingInputPositions] = as.vector(t(replaceVals))
+  }
+  else { TPdonorCountsChimera[i,matchingInputPositions] = as.vector(t(replaceVals)) }
+}
+head(TPdonorCountsChimera)
+boxplot(as.vector(TPdonorCountsChimera))
+
+
+
+### TP Acceptor counts
+TPacceptorChimera = validation[,4:82]
+TPacceptorChimera[,1] = fusionPairsENSG[,7]
+tmp = gsub("X", "", colnames(TPacceptorChimera))
+adjustedColnames_tp = substr(gsub("\\.", "-", tmp),start = 1,stop = 36)
+TPacceptorCountsChimera = matrix(NA, nrow = nrow(TPacceptorChimera), ncol = (ncol(TPacceptorChimera)-1),)
+rownames(TPacceptorCountsChimera) = TPacceptorChimera[,1]
+colnames(TPacceptorCountsChimera) = adjustedColnames_tp[2:length(adjustedColnames_tp)]
+head(TPacceptorCountsChimera)
+
+
+for (i in 1:nrow(TPacceptorChimera)) {
+  geneRow = which(rownames(chimeric.cpm) == TPacceptorChimera[i,1])
+  if (length(geneRow) < 1) { next }
+  geneSamps = gsub("X", "", colnames(TPacceptorChimera)[which(TPacceptorChimera[i,] %in% c(1,2))])
+  geneData = chimeric.cpm[geneRow,which(colnames(chimeric.cpm) %in% geneSamps)]
+  names(geneData) = colnames(chimeric.cpm)[which(colnames(chimeric.cpm) %in% geneSamps)]
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) > 1) {
+    replaceVals = geneData[na.omit(match(adjustedColnames_tp,names(geneData)))]
+  }
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) == 1) {
+    replaceVals = geneData }
+  if (length(na.omit(match(adjustedColnames_tp,names(geneData)))) < 1) {next}
+  inputPositions = which(TPacceptorChimera[i,] %in% c(1,2))
+  names(inputPositions) = gsub("X","",colnames(TPacceptorChimera)[which(TPacceptorChimera[i,] %in% c(1,2))])
+  toRemove = which(!names(inputPositions) %in% names(geneData))
+  matchingInputPositions = inputPositions[-toRemove]
+  
+  if (length(replaceVals) > 1) {
+    TPacceptorCountsChimera[i,matchingInputPositions] = as.vector(t(replaceVals))
+  }
+  else { TPacceptorCountsChimera[i,matchingInputPositions] = as.vector(t(replaceVals)) }
+}
+head(as.vector(TPacceptorCountsChimera))
+boxplot(as.vector(TPacceptorCountsChimera))
+```
+
+Plot TP together
+```{r}
+
+x = na.omit(as.vector(TPdonorCounts))
+y = na.omit(as.vector(TPdonorCountsChimera))
+z = na.omit(as.vector(TPacceptorCounts))
+a = na.omit(as.vector(TPacceptorCountsChimera))
+
+boxplot(as.vector(TPdonorCounts), as.vector(TPdonorCountsChimera), as.vector(TPacceptorCounts), as.vector(TPacceptorCountsChimera), ylab = "cpm", names = c("donor", "donor-chimera", "acceptor", "acceptor-chimera"),varwidth = TRUE, main = "gene counts for fusion gene pairs\nn = 28-29 fusions")
+
+```
