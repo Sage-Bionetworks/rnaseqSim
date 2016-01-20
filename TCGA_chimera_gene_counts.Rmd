@@ -220,9 +220,6 @@ boxplot(as.vector(TPacceptorCounts))
 ```
 
 
-
-
-
 TP chimera  counts
 ```{r}
 TPcounts = 0
@@ -316,4 +313,23 @@ a = na.omit(as.vector(TPacceptorCountsChimera))
 
 boxplot(as.vector(TPdonorCounts), as.vector(TPdonorCountsChimera), as.vector(TPacceptorCounts), as.vector(TPacceptorCountsChimera), ylab = "cpm", names = c("donor", "donor-chimera", "acceptor", "acceptor-chimera"),varwidth = TRUE, main = "gene counts for fusion gene pairs\nn = 28-29 fusions")
 
+
+boxplot(log2(as.vector(TPdonorCounts)), log2(as.vector(TPdonorCountsChimera)), log2(as.vector(TPacceptorCounts)), log2(as.vector(TPacceptorCountsChimera)), ylab = "log2 cpm", names = c("donor", "donor-chimera", "acceptor", "acceptor-chimera"),varwidth = TRUE, main = "gene counts for fusion gene pairs\nn = 28-29 fusions")
+
+boxplot(log2(data+1), ylab = "log2 cpm", outline = FALSE, main = "all gene counts for non-chimeric reads")
+
+boxplot(log2(cdata+1), ylab = "log2 cpm", outline = FALSE, main = "all gene counts for chimeric reads")
+
 ```
+
+
+
+Relative values donor/acceptor
+```{r}
+relativeTPCounts = TPdonorCounts/TPacceptorCounts
+relativeTPCountsChimera = TPdonorCountsChimera/TPacceptorCountsChimera
+length(which(!is.na(relativeTPCountsChimera)))
+
+boxplot(as.vector(relativeTPCounts), as.vector(relativeTPCountsChimera), varwidth = TRUE, names = c("non-chimeric", "chimeric"), ylab = "donor cpm / acceptor cpm", main = "Relative counts\ndonor:acceptor")
+```
+
