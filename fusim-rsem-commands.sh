@@ -130,3 +130,32 @@ rsem-simulate-reads /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/dipl
 
 # merge read datasets
 cat sim1a_30m_fus_2.fq sim_diploid_30m_2.fq | gzip > sim1a_30m_merged_2.fq.gz &
+
+# sim1a dataset 100 million reads
+
+rsem-simulate-reads /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/diploid_reference_genome/STAR/GRCh37v75_diploid /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/OICR_CPCG_prostate/star-ref/CPCG_0340.stat/CPCG_0340.model CPCG_0340.isoforms.results_modDiploid_0_100 0.066 99989700 sim_diploid_100m &> sim_diploid_100m.log &
+
+rsem-simulate-reads sim1a_10events /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/OICR_CPCG_prostate/star-ref/CPCG_0340.stat/CPCG_0340.model CPCG_0340.isoforms.results_modDiploidFusionOnly_0_100 0.066 10300 sim1a_100m_fus &> sim1a_100m_fus.log &
+
+
+
+
+## making truth file
+
+~/Computing/rnaseq_fusion_simulation/convert_fusim_to_bedpe.py unfiltered_sim1a_fusions.txt --bedpe > unfiltered_sim1a_fusions.bedpe
+
+for gene in `grep fusionGene filtered_sim1a_fusions.fasta | cut -f2 -d' ' | cut -f2 -d=`; do grep $gene unfiltered_sim1a_fusions.bedpe; done > filtered_sim1a_fusions.bedpe 
+
+
+## QC alignment of reads with STAR
+
+qsub -N star -l h_vmem=32G -o sim1a_100m_align.log -j y -pe threads 4 -q regular -V -S /bin/bash -cwd  ~/bin/run_STAR_for_chimeric.sh /external-data/Genome/indicies/Hsapiens_Ensembl_GRCh37_STAR/primary_nomask/ ../sim1a_100m_merged_1.fq.gz ../sim1a_100m_merged_2.fq.gz sim1a_100m_starqc
+
+
+######################
+# Learn RSEM model   #
+######################
+
+# align downsampled dataset
+
+rsem-calculate-expression --num-threads 4 --paired-end --estimate-rspd --strand-specific --star /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/OICR_CPCG_prostate/CPCG_0336_80m_1.fastq /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/OICR_CPCG_prostate/CPCG_0336_80m_2.fastq /external-data/Genome/indicies/Hsapiens_Ensembl_GRCh37_RSEM/STAR_ENSGv75/GRCh37v75_STAR CPCG_0336 &> CPCG_0336_align.log
