@@ -18,7 +18,6 @@ with open(args.GTF, 'r') as gtf:
 			main_vals = line.strip().split('\t')
 			main_vals[0] = '-'.join([main_vals[0], args.suffix])
 			if not len(main_vals) == 9:
-<<<<<<< HEAD
 				print '%s\n' % len(main_vals)
 			else:
 				attributes = main_vals.pop().strip().split(';')
@@ -37,20 +36,10 @@ with open(args.GTF, 'r') as gtf:
 			print '%s\t%s' % (first_part, second_part)
 		else:
 			print line.strip()
-=======
-				print line
-			else:
-				attributes = main_vals[8].strip().split(';')
-				for i in range(len(attribues)):
-					if attributes[i].startswith('gene_id'):
-						gene = attributes[i].split('\s')
-						gene[1] = '-'.join([gene[1].rstrip('"'), args.suffix+'"'])
-						attributes[i] = ' '.join(gene)
-					elif item.startswith('transcript_id'):
-						transcript = item.split('\s')
-						transcript[1] = '-'.join([transcript[1].rstrip('"'), args.suffix+'"'])
-						attributes[i] = ' '.join(transcript)
-			first_part = '\t'.join(main_vals)
-			second_part = '; '.attributes.join(attributes)
-			print '%s\t%s' % (first_part, second_part)
->>>>>>> 688fc3583f054923a9a56ffe6c009fdb0ffcbee3
+
+
+
+
+
+
+
