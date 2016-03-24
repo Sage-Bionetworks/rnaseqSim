@@ -3,24 +3,17 @@
 # Mar 9, 2016
 
 setwd('~/Computing/cancer/SMC_RNA/OICR_samples/')
-expThreshold = 0 # in log TPM scale
-
-# bowtie with 50% unaligned
-#inpath = "~/Computing/cancer/SMC_RNA/OICR_samples/CPCG_0340_wRSPD.isoforms.results"
+expThreshold = 1 # in log TPM scale
+targetDepth = 100 # in million reads
 
 # star
 inpath = "~/Computing/cancer/SMC_RNA/OICR_samples/star-ref/CPCG_0340.isoforms.results"
-outpath = paste(inpath, 'modDiploid', expThreshold, sep = "_")
-outpathFus = paste(inpath, 'modDiploidFusionOnly', expThreshold, sep = "_")
+outpath = paste(inpath, 'modDiploid', expThreshold, targetDepth, sep = "_")
+outpathFus = paste(inpath, 'modDiploidFusionOnly', expThreshold, targetDepth, sep = "_")
 
 # drop suffix numbers from transcript and gene ids -- not necessary for star refs
 model = read.delim(inpath)
 head(model)
-# model$transcript_short = as.vector(sapply(as.character(model$transcript_id), function(y){ unlist(strsplit(x = y,split = "\\."))[1] }))
-# head(model)
-# genetemp = model$gene_id
-# model$gene_id = as.vector(sapply(as.character(model$gene_id), function(y){ unlist(strsplit(x = y,split = "\\."))[1] }))
-# head(model)
 
 # look at data
 sum(model$TPM)
@@ -39,7 +32,6 @@ hist(log(model$length[which(model$TPM > 0)]), col = "honeydew1", main = "observe
 
 # create diploid set
 temp = model
-#temp$transcript_id = model$transcript_short
 diploid = rbind(temp[,1:8], temp[,1:8])
 diploid$transcript_id = as.character(diploid$transcript_id)
 diploid$gene_id = as.character(diploid$gene_id)
@@ -90,19 +82,12 @@ fusions[,5:8] = 0
 head(fusions)
 
 
-# use entire observed TPM distribution for sampling
-# nonZero = model$TPM[model$TPM > 0]
-# fusionExp = sample(nonZero, size = nrow(gtf), replace = FALSE)
-# hist(log(fusionExp), col = "honeydew")
-
 # use only the TPM distribution greater than 0 (in log) for sampling
 greaterThanLogZero = model$TPM[log(model$TPM) > expThreshold]
 fusionExp = sample(greaterThanLogZero, size = nrow(gtf), replace = FALSE)
 hist(log(fusionExp), col = "honeydew")
 
 
-#modelMod = model
-#modelMod$TPM[(nrow(model)-(numberOfFusions-1)):nrow(model)] = fusionExp
 fusions[,6] = fusionExp
 head(fusions)
 toZero = match(fusionExp, model$TPM)
@@ -111,17 +96,14 @@ diploid$TPM[(nrow(model)+toZero)] = 0
 
 
 # plot TPM vs length of fusions
-#plot(modelMod$length[(nrow(modelMod)-(numberOfFusions-1)):nrow(modelMod)], log(modelMod$TPM[(nrow(modelMod)-(numberOfFusions-1)):nrow(modelMod)]), ylab = "log TPM", xlab = "transcript length")
-#plot(modelMod$length[(nrow(modelMod)-(numberOfFusions-1)):nrow(modelMod)], modelMod$TPM[(nrow(modelMod)-(numberOfFusions-1)):nrow(modelMod)], ylab = "log TPM", xlab = "transcript length")
 plot(fusions[,3],log(fusions[,6]), xlab = "fusion length", ylab = "log TPM of fusion")
-
-# colnames(fusions) = colnames(diploid)
-# x = rbind(diploid, fusions)
-# tail(x)
-# x$TPM = as.numeric(x$TPM)
-# sum(x$TPM)
-
 colnames(fusions) = colnames(diploid)
+
+
+# alter TPM of fusions file based on target read depth
+targetTPM = fusions$TPM * targetDepth # remember that targetDepth is in million reads
+fusions$TPM = targetTPM
+fusions
 
 write.table(diploid, file = outpath, append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
 write.table(fusions, file = outpathFus, append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
