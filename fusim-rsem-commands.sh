@@ -153,9 +153,14 @@ qsub -N star -l h_vmem=32G -o sim1a_100m_align.log -j y -pe threads 4 -q regular
 
 
 ######################
-# Learn RSEM model   #
+# Generating sim1b   #
 ######################
 
-# align downsampled dataset
+# align downsampled dataset to learn RSEM model
 
 rsem-calculate-expression --num-threads 4 --paired-end --estimate-rspd --strand-specific --star /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/OICR_CPCG_prostate/CPCG_0336_80m_1.fastq /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/OICR_CPCG_prostate/CPCG_0336_80m_2.fastq /external-data/Genome/indicies/Hsapiens_Ensembl_GRCh37_RSEM/STAR_ENSGv75/GRCh37v75_STAR CPCG_0336 &> CPCG_0336_align.log
+
+
+# generate fusion events
+
+java -jar ../../../../Scripts/fusim-0.2.2/fusim.jar --gene-model=/work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/Hsapiens_Ensembl_v75.refflat.txt --fusions=300 --reference=/external-data/Genome/genomes/Hsapiens_Ensembl_GRCh37/primary_nomask/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa --fasta-output=sim1b_unfiltered_fusions.fasta --text-output=sim1b_unfiltered_fusions.txt --cds-only --keep-exon-boundary --auto-correct-orientation &>sim1b_generation.log
