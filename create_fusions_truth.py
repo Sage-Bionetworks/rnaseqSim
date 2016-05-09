@@ -4,6 +4,7 @@ from toil.job import Job
 import subprocess
 import argparse
 import requests
+import os
 
     
 
@@ -22,15 +23,17 @@ def runFusim(numEvents, simName, memory="2G", cores=1, disk="1M"):
 	numEventsToSimulate = int(numEvents)*5
 	cmd = ''.join(['java -jar ', fusimJarPath, ' --gene-model=', referenceGeneModels, ' --fusions=', str(numEventsToSimulate), ' --reference=', referenceGenome, ' --fasta-output=', simName+'.fasta', ' --text-output=', simName+'fusions.txt', ' --auto-correct-orientation --cds-only --keep-exon-boundary'])
 	print cmd
-	subprocess.call(cmd, shell=True)
+	subprocess.call(cmd, shell = True)
 
 
 def filterFusionEvents(numEvents, minLength, simName, memory="100M", cores=1, disk="1M"):
-	'''Reads in Fusim fasta file and writes out a GTF, FASTA, and BEDPE of events meeting min length criteria.'''
+	'''Reads in Fusim output files and writes out a GTF, FASTAs, and BEDPE of events meeting min length criteria.'''
 	
 	filteredFusimEvents = dict()
+	allFastaFilenames = ''
 
-	# Now go through the fasta file and filter it
+
+	# Go through the fasta file and filter it
 	numberMeetingCriteria = 0
 	inputFusim = simName+'.fasta'
 	with open(inputFusim, 'r') as fusim:
@@ -60,17 +63,19 @@ def filterFusionEvents(numEvents, minLength, simName, memory="100M", cores=1, di
 						
 						genesFused = fullName.strip().split()[1].lstrip('fusionGene=')
 						filteredFusimEvents[genesFused] = seqname
-						print ' '.join(['Adding to filteredFusimEvents dict:', genesFused, seqname])
+#						print ' '.join(['Adding to filteredFusimEvents dict:', genesFused, seqname])
 						
 						# write out fasta
-						fasta = open('.'.join([seqname, 'fasta']),'w')
+						fastaFilename = '.'.join([seqname, 'fasta'])
+						allFastaFilenames += fastaFilename+','
+						fasta = open(fastaFilename,'w')
 						fasta.write('>'+seqname+'\n')
 						fasta.write(line)
 						fasta.close()
 		gtf.close()
 	fusim.close()
 						
-	# make truth file
+	# Make truth file
 	with open(simName+'fusions.txt', 'r') as fusim2:
 	
 		with open(simName+'_filtered.bedpe', 'w') as bedpe:
@@ -102,16 +107,24 @@ def filterFusionEvents(numEvents, minLength, simName, memory="100M", cores=1, di
 							# subtract 1 from upstream position to be consistent with BED 0-based numbering	
 							upstreamA = int(geneApos) - 1
 							upstreamB = int(geneBpos) - 1
-							bedpeTxt = '\t'.join([geneA[3], str(upstreamA), geneApos, geneB[3], str(upstreamB), geneBpos, geneA[0], '0', geneA[4], geneB[4], getHGNC(nameA), getHGNC(nameB)])
+#							bedpeTxt = '\t'.join([geneA[3], str(upstreamA), geneApos, geneB[3], str(upstreamB), geneBpos, geneA[0], '0', geneA[4], geneB[4], getHGNC(nameA), getHGNC(nameB)])
+							bedpeTxt = '\t'.join([geneA[3], str(upstreamA), geneApos, geneB[3], str(upstreamB), geneBpos, geneA[0], '0', geneA[4], geneB[4]])
 							bedpe.write(bedpeTxt+'\n')
 #							print '%s' % bedpeTxt
 					geneA = None
 					geneB = None
+	
+	return(allFastaFilenames)
+	
+	
 
+def makeFusionReference(fastaList, simName, numEvents, memory="2G", cores=4, disk="1M"):
+	'''Runs RSEM to make reference for fusion events.'''
+	
+	cmd = ' '.join(['rsem-prepare-reference --gtf', simName+'_filtered.gtf', '--star --num-threads 4', fastaList.rstrip(','), '_'.join([simName, str(numEvents), 'ev'])])
+	print cmd
+	subprocess.call(cmd, shell=True)
 
-#~/Computing/rnaseq_fusion_simulation/convert_fusim_to_bedpe.py unfiltered_sim1a_fusions.txt --bedpe > unfiltered_sim1a_fusions.bedpe
-
-#for gene in `grep fusionGene filtered_sim1a_fusions.fasta | cut -f2 -d' ' | cut -f2 -d=`; do grep $gene unfiltered_sim1a_fusions.bedpe; done > filtered_sim1a_fusions.bedpe 
 
 
 ###############
@@ -119,9 +132,10 @@ def filterFusionEvents(numEvents, minLength, simName, memory="100M", cores=1, di
 ###############
 
 def getHGNC(ENSG):
-	r = requests.get("http://grch37.rest.ensembl.org//xrefs/id/"+ENSG+"?external_db=HGNC", headers={ "Content-Type" : "application/json"})
+	r = requests.get("http://grch37.rest.ensembl.org/xrefs/id/"+ENSG+"?external_db=HGNC", headers={ "Content-Type" : "application/json"})
 	if not r.ok:
 		r.raise_for_status()
+		return('HGNClookupFailed')
  	decoded = r.json()[0]
  	return(decoded['display_id'])
 
@@ -136,10 +150,18 @@ if __name__=="__main__":
 	parser.add_argument("--simName", help="Prefix for the simulation filenames.", default='testSimulation', required=False)
 	args = parser.parse_args()
 
-	args.logLevel = "INFO"
+	execfile(os.environ['MODULESHOME']+'/init/python.py')
+	module('load','rsem/1.2.8')
 
+
+	## Wrap jobs
 	j1 = Job.wrapFn(runFusim, numEvents=args.numEvents, simName=args.simName)
 	j2 = Job.wrapFn(filterFusionEvents, numEvents=args.numEvents, minLength=args.minLength, simName=args.simName)
+	j3 = Job.wrapFn(makeFusionReference, fastaList=j2.rv(), simName=args.simName, numEvents=args.numEvents)
+	
+	## Specify order
 	j1.addFollowOn(j2)
+	j2.addFollowOn(j3)
+	
 	
 	Job.Runner.startToil(j1, args)
