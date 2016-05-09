@@ -5,7 +5,7 @@ import sys
 truthFusions = dict()
 with open(sys.argv[1], 'r') as truth:
 	for line in truth:
-		if line.startswith('ENSG'):
+		if line.startswith('ENS'):
 			vals = line.strip().split()
 			truthFusions[str(vals[0])] = 0
 			print vals[0]
