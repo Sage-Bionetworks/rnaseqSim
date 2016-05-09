@@ -15,3 +15,4 @@ sample=`basename $1`
 
 rsem-calculate-expression --num-threads 8 --paired-end --estimate-rspd --strand-specific --star $1 $2 /external-data/Genome/indicies/Hsapiens_Ensembl_GRCh37_RSEM/STAR_ENSGv75/GRCh37v75_STAR $sample &> $sample.align.log
 
+rsem-plot-model $sample $sample.modelPlots
