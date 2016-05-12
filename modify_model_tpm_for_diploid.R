@@ -2,12 +2,17 @@
 # KKD for Sage Bionetworks
 # Mar 9, 2016
 
-setwd('~/Computing/cancer/SMC_RNA/OICR_samples/')
-expThreshold = 1 # in log TPM scale
-targetDepth = 100 # in million reads
+setwd('~/Computing/cancer/SMC_RNA/simulated_datasets/')
+expThreshold = 2 # in log TPM scale
+targetDepth = 20 # in million reads
 
-# star
-inpath = "~/Computing/cancer/SMC_RNA/OICR_samples/star-ref/CPCG_0340.isoforms.results"
+#inpath = "~/Computing/cancer/SMC_RNA/OICR_samples/star-ref/CPCG_0340.isoforms.results"
+#gtf = read.delim("~/Computing/cancer/SMC_RNA/sim1/unfiltered_sim1_filtered.gtf",header = FALSE)
+
+inpath = "~/Computing/cancer/SMC_RNA/OICR_sample_models/CPCG_0336.isoforms.results"
+gtf = read.delim("~/Computing/cancer/SMC_RNA/simulated_datasets/sim1a/sim1a_test_filtered.gtf",header = FALSE)
+
+
 outpath = paste(inpath, 'modDiploid', expThreshold, targetDepth, sep = "_")
 outpathFus = paste(inpath, 'modDiploidFusionOnly', expThreshold, targetDepth, sep = "_")
 
@@ -72,19 +77,19 @@ head(diploid)
 
 
 # get values for the fusion genes
-gtf = read.delim("~/Computing/cancer/SMC_RNA/sim1/unfiltered_sim1_filtered.gtf",header = FALSE)
 head(gtf)
-fusions = data.frame(gtf$V1)
-fusions[,2] = gtf$V1
-fusions[,3] = gtf$V5
-fusions[,4] = gtf$V5
+geneOnlyGtf = gtf[gtf$V3 == "gene",]
+fusions = data.frame(geneOnlyGtf$V1)
+fusions[,2] = geneOnlyGtf$V1
+fusions[,3] = geneOnlyGtf$V5
+fusions[,4] = geneOnlyGtf$V5
 fusions[,5:8] = 0
 head(fusions)
 
 
-# use only the TPM distribution greater than 0 (in log) for sampling
+# use only the TPM distribution greater than expThreshold (in log) for sampling
 greaterThanLogZero = model$TPM[log(model$TPM) > expThreshold]
-fusionExp = sample(greaterThanLogZero, size = nrow(gtf), replace = FALSE)
+fusionExp = sample(greaterThanLogZero, size = nrow(geneOnlyGtf), replace = FALSE)
 hist(log(fusionExp), col = "honeydew")
 
 
@@ -100,10 +105,14 @@ plot(fusions[,3],log(fusions[,6]), xlab = "fusion length", ylab = "log TPM of fu
 colnames(fusions) = colnames(diploid)
 
 
-# alter TPM of fusions file based on target read depth
-targetTPM = fusions$TPM * targetDepth # remember that targetDepth is in million reads
-fusions$TPM = targetTPM
-fusions
+# calculate fraction reads for fusions
+fusionReads = sum(fusions$TPM)*targetDepth
+otherReads = sum(as.numeric(diploid$TPM))*targetDepth
+print(paste('Number of fusion reads to simulate:', fusionReads, sep = ' '))
+print(paste('Number of other reads to simulate:', otherReads, sep = ' '))
+sum(fusionReads, otherReads)/1e6
+sum(fusions$TPM, as.numeric(diploid$TPM))/1e6
+
 
 write.table(diploid, file = outpath, append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
 write.table(fusions, file = outpathFus, append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
