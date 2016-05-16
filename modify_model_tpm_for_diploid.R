@@ -6,7 +6,7 @@
 library(argparse)
 
 parser = ArgumentParser(description='Generate diploid TPM files for read simulation.')
-parser$add_argument('--model', dest="inpath", type="character", required=TRUE, help='RSEM model file.')
+parser$add_argument('--TPM', dest="inpath", type="character", required=TRUE, help='Isoform TPM file from RSEM.')
 parser$add_argument('--gtf', type="character", required=TRUE, help='Gene models from which to simulate reads.')
 parser$add_argument('--expThresh', default = 2, type="double", help='Minimum log TPM value for fusion gene [default %(default)s].')
 parser$add_argument('--targetDepth', default = 20, type="integer", help='Total million reads to simulate [default %(default)s].')
@@ -15,28 +15,27 @@ parser$add_argument('--wd', default = getwd(), type="character", help='Directory
 
 args = parser$parse_args()
 
-setwd(get(args$wd))
-inpath = get(args$accumulate)
-gtf = read.delim(get(args$gtf),header = FALSE)
-expThreshold = get(args$expThresh)
-targetDepth = get(args$targetDepth)
+inpath = args$inpath
+gtf = read.delim(args$gtf,header = FALSE)
+expThreshold = args$expThresh
+targetDepth = args$targetDepth
+setwd(args$wd)
 
 outpath = paste(inpath, 'modDiploid', expThreshold, targetDepth, sep = "_")
 outpathFus = paste(inpath, 'modDiploidFusionOnly', expThreshold, targetDepth, sep = "_")
 
 # Read in RSEM model
 model = read.delim(inpath)
-head(model)
 
 # look at data
-sum(model$TPM)
+print(paste("sum model TPM", sum(as.numeric(model$TPM))))
 sum(model$length)
 sum(model$effective_length)
 sum(model$expected_count)
 sum(model$FPKM)
 
-hist(log(model$TPM), col = "honeydew1", main = "TPM")
-hist(log(model$length), col = "honeydew1", main = "all transcripts - length")
+#hist(log(model$TPM), col = "honeydew1", main = "TPM")
+#hist(log(model$length), col = "honeydew1", main = "all transcripts - length")
 
 print(paste("Fraction not observed", length(which(model$TPM == 0))/ nrow(model)))
 print(paste("Fraction not observed", length(which(model$expected_count == 0))/ nrow(model)))
