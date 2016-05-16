@@ -18,11 +18,11 @@ def generateReads(model, isoV, simName, fusRef, fusV, simReads, otherReads, memo
 
 	cmd = ' '.join(['rsem-simulate-reads /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/diploid_reference_genome/STAR/GRCh37v75_diploid', model, isoV, '0.066', str(otherReads), simName+'_diploid'])
 	print cmd
-#	subprocess.call(cmd, shell = True)
+	subprocess.call(cmd, shell = True)
 
 	cmd = ' '.join(['rsem-simulate-reads', fusRef, model, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
 	print cmd
-#	subprocess.call(cmd, shell = True)
+	subprocess.call(cmd, shell = True)
 
 
 
@@ -30,9 +30,8 @@ def postProcessReads(simName, totalReads, simReads, memory="100M", cores=1, disk
 	'''Changes read names and merges read files.'''
 	
 	insertPosition = random.sample(xrange(int(totalReads)),int(simReads))
-	insertPosition.sort(reverse=True)
-	print '%s' % insertPosition
-	insertPosition2 = list(insertPosition)
+	insertPosition.sort(reverse=False)
+#	print '%s' % insertPosition
 	
 	diploidR1 = simName+'_diploid_1.fq'
 	diploidR2 = simName+'_diploid_2.fq'
@@ -40,8 +39,15 @@ def postProcessReads(simName, totalReads, simReads, memory="100M", cores=1, disk
 	fusionR2 = simName+'_fusions_2.fq'
 	
 	renameAndMerge(diploid = diploidR1, fusion = fusionR1, inserts = insertPosition, keyFileName = simName+'_readKey_1.txt', fastqFileName = simName+'_merged_1.fq')
+	cmd = ' '.join(['sort -k1,1', simName+'_merged_1.fq', '| sed -e \'s/\\t/\\n/g\' - | gzip >', simName+'_mergeSort_1.fq.gz'])
+	print cmd
+	subprocess.call(cmd, shell = True)
 	
-	renameAndMerge(diploid = diploidR2, fusion = fusionR2, inserts = insertPosition2, keyFileName = simName+'_readKey_2.txt', fastqFileName = simName+'_merged_2.fq')
+	
+	renameAndMerge(diploid = diploidR2, fusion = fusionR2, inserts = insertPosition, keyFileName = simName+'_readKey_2.txt', fastqFileName = simName+'_merged_2.fq')
+	cmd = ' '.join(['sort -k1,1', simName+'_merged_2.fq', '| sed -e \'s/\\t/\\n/g\' - | gzip >', simName+'_mergeSort_2.fq.gz'])
+	print cmd
+	subprocess.call(cmd, shell = True)
 	
 
 
@@ -55,67 +61,63 @@ def renameAndMerge(diploid, fusion, inserts, keyFileName, fastqFileName):
 	keyFH = open(keyFileName, 'w')
 	fqFH = open(fastqFileName, 'w')
 	
-	fusionFH = open(fusion, 'r')
-
-	with open(diploid, 'r') as diploidFQ:
-		lineCounter = 0
-		fusRead = ''
-		diploidRead = ''
-		insertsCurrent = inserts.pop()
-		for line in diploidFQ:
-			# Check for complete FASTQ record
-			if lineCounter % 4 == 0:
-				# Check for whether to insert one of the fusion reads
-				print lineCounter, lineCounter/4, insertsCurrent
-				if lineCounter/4 == insertsCurrent:
-					for i in xrange(4):
-						tmp = ''.join([fusRead,fusionFH.readline()])
-						fusRead = tmp
-					ifrReturns = insertFusionRead(fusionRead=fusRead, inserts=inserts, lC=lineCounter, dR=diploidRead, keyFH=keyFH, fqFH=fqFH, fusionFH=fusionFH)
-					print ifrReturns
-					insertsCurrent = ifrReturns[0]
-					lineCounter = ifrReturns[1]
-					fusRead = ''
-				elif diploidRead == '':
-					pass
-				else: 
-					writeFastQ(readString=diploidRead, readNumber=lineCounter/4, keyFileHandle=keyFH, fastqFileHandle=fqFH)
-				diploidRead = line
+	# Write out fusion reads with new numbers
+	iC = 0 # inserts counter
+	read = ''
+	with open(fusion, 'r') as fusionFH:
+		lC = 0
+		for line in fusionFH:
+			if lC == 0:
+				header = '\t'.join([str(inserts[iC]),line.strip()])	
+				read = '@'+str(inserts[iC])
+				iC += 1			
+			elif lC % 4 == 0 and lC > 0:
+				writeFastQ(header, read, keyFileHandle=keyFH, fastqFileHandle=fqFH) 				
+				read = '@'+str(inserts[iC])
+				header = '\t'.join([str(inserts[iC]),line.strip()])	
+				iC += 1		
 			else:
-				tmp = ''.join([diploidRead, line])
-				diploidRead = tmp
-			lineCounter += 1
-		writeFastQ(readString=diploidRead, readNumber=lineCounter/4, keyFileHandle=keyFH, fastqFileHandle=fqFH)
+				tmp = '\t'.join([read, line.strip()])
+				read = tmp	
+			lC +=1
+		writeFastQ(header, read, keyFileHandle=keyFH, fastqFileHandle=fqFH) 				
+
+	# Write out regular reads with new numbers
+	rC = 0 # read counter
+	read = ''
+	lC = 0 # line counter
+	iC = 0 # inserts counter
+	with open(diploid, 'r') as diploidFH:
+		for line in diploidFH:
+			# skip read numbers that were already assigned to fusion reads
+			if iC < len(inserts):
+				while rC == inserts[iC]:
+					rC += 1
+					iC += 1
+					if iC >= len(inserts): break
+			# print reads with new numbers
+			if lC % 4 == 0:		
+				if lC > 0:
+					writeFastQ(header, read, keyFileHandle=keyFH, fastqFileHandle=fqFH) 								
+				header = '\t'.join([str(rC),line.strip()])	
+				read = '@'+str(rC)
+				rC += 1			
+			else:
+				tmp = '\t'.join([read, line.strip()])
+				read = tmp	
+			lC +=1
+		# print the last read
+		writeFastQ(header, read, keyFileHandle=keyFH, fastqFileHandle=fqFH) 				
+
 	
 	keyFH.close()
 	fqFH.close()
 	
 
-def insertFusionRead(fusionRead, inserts, lC, dR, keyFH, fqFH, fusionFH):
-
-	writeFastQ(readString=fusionRead, readNumber=lC/4, keyFileHandle=keyFH, fastqFileHandle=fqFH)
-	if len(inserts) > 0:
-		insertsCr = inserts.pop()
-	else:
-		insertsCr = -1
-	lC += 4
-	# check that the next read is not also a fusion read
-	if not insertsCr == lC/4:
-		writeFastQ(readString=dR, readNumber=lC/4, keyFileHandle=keyFH, fastqFileHandle=fqFH)
-		return([insertsCr, lC])
-	else:
-		fusRead = ''
-		for i in xrange(4):
-			tmp = ''.join([fusRead, fusionFH.readline()])
-			fusRead = tmp
-		insertFusionRead(fusionRead=fusRead, inserts=inserts, lC=lC, dR=dR, keyFH=keyFH, fqFH=fqFH, fusionFH=fusionFH)
-
-
-def writeFastQ(readString, readNumber, keyFileHandle, fastqFileHandle):
+def writeFastQ(header, readString, keyFileHandle, fastqFileHandle):
 	
-	lines = readString.split('\n')
-	keyFileHandle.write('\t'.join([str(readNumber), lines[0], '\n']))
-	fastqFileHandle.write('\n'.join(['@'+str(readNumber),lines[1],lines[2],lines[3]+'\n']))
+	keyFileHandle.write(header+'\n')
+	fastqFileHandle.write(readString+'\n')
 
 
 
