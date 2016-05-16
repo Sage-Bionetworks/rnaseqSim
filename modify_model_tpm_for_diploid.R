@@ -1,22 +1,30 @@
+#! /usr/bin/env Rscript
 # Manipulates learned isoform TPM values to adjust for dipoid genome simulation.
 # KKD for Sage Bionetworks
 # Mar 9, 2016
 
-setwd('~/Computing/cancer/SMC_RNA/simulated_datasets/')
-expThreshold = 2 # in log TPM scale
-targetDepth = 20 # in million reads
+library(argparse)
 
-#inpath = "~/Computing/cancer/SMC_RNA/OICR_samples/star-ref/CPCG_0340.isoforms.results"
-#gtf = read.delim("~/Computing/cancer/SMC_RNA/sim1/unfiltered_sim1_filtered.gtf",header = FALSE)
+parser = ArgumentParser(description='Generate diploid TPM files for read simulation.')
+parser$add_argument('--model', dest="inpath", type="character", required=TRUE, help='RSEM model file.')
+parser$add_argument('--gtf', type="character", required=TRUE, help='Gene models from which to simulate reads.')
+parser$add_argument('--expThresh', default = 2, type="double", help='Minimum log TPM value for fusion gene [default %(default)s].')
+parser$add_argument('--targetDepth', default = 20, type="integer", help='Total million reads to simulate [default %(default)s].')
+parser$add_argument('--wd', default = getwd(), type="character", help='Directory for output files [default %(default)s].')
 
-inpath = "~/Computing/cancer/SMC_RNA/OICR_sample_models/CPCG_0336.isoforms.results"
-gtf = read.delim("~/Computing/cancer/SMC_RNA/simulated_datasets/sim1a/sim1a_test_filtered.gtf",header = FALSE)
 
+args = parser$parse_args()
+
+setwd(get(args$wd))
+inpath = get(args$accumulate)
+gtf = read.delim(get(args$gtf),header = FALSE)
+expThreshold = get(args$expThresh)
+targetDepth = get(args$targetDepth)
 
 outpath = paste(inpath, 'modDiploid', expThreshold, targetDepth, sep = "_")
 outpathFus = paste(inpath, 'modDiploidFusionOnly', expThreshold, targetDepth, sep = "_")
 
-# drop suffix numbers from transcript and gene ids -- not necessary for star refs
+# Read in RSEM model
 model = read.delim(inpath)
 head(model)
 
