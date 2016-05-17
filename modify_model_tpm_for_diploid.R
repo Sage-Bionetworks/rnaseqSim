@@ -39,11 +39,28 @@ sum(model$FPKM)
 
 print(paste("Fraction not observed", length(which(model$TPM == 0))/ nrow(model)))
 print(paste("Fraction not observed", length(which(model$expected_count == 0))/ nrow(model)))
-hist(log(model$length[which(model$TPM > 0)]), col = "honeydew1", main = "observed transcripts - length")
+#hist(log(model$length[which(model$TPM > 0)]), col = "honeydew1", main = "observed transcripts - length")
 
+
+# Modify TPM values to introduce noise to original model.
+# Noise is modeled by a gamma distribution.
+dirChange = rbinom(n = nrow(model), size = 1, prob = 0.5)
+fracChange = rgamma(n = nrow(model),shape = 2,scale = 1)
+#hist(fracChange)
+altModel = model
+posChanges = which(dirChange == 1)
+altModel$TPM[posChanges] = model$TPM[posChanges] + (fracChange[posChanges]*model$TPM[posChanges])
+negChanges = which(dirChange == 0)
+altModel$TPM[negChanges] = model$TPM[negChanges] - (fracChange[negChanges]*model$TPM[negChanges])
+altModel$TPM[which(altModel$TPM < 0)] = 0
+preSum = sum(altModel$TPM)
+altModel$TPM = altModel$TPM/preSum * 1e6
+#plot(log(altModel$TPM), log(model$TPM))
+print(paste('correlation:', cor(log(altModel$TPM), log(model$TPM), method = "spearman")))
+print(paste('sum altModel TPM:', sum(altModel$TPM)))
 
 # create diploid set
-temp = model
+temp = altModel
 diploid = rbind(temp[,1:8], temp[,1:8])
 diploid$transcript_id = as.character(diploid$transcript_id)
 diploid$gene_id = as.character(diploid$gene_id)
@@ -55,6 +72,7 @@ diploid$gene_id[(nrow(model)+1):nrow(diploid)] = paste(temp$gene_id, "hap2", sep
 head(diploid)
 tail(diploid)
 diploid[(nrow(model)-5):(nrow(model)+5),]
+sum(diploid$TPM)
 
 
 # Adjust TPM values between pairs in diploid set.
@@ -68,12 +86,12 @@ diploid$TPM[1:length(splitVal)] = originalTPM*splitVal
 diploid$TPM[(length(splitVal)+1):nrow(diploid)] = originalTPM*(1-splitVal)
 sum(diploid$TPM)
 
-hist(log(diploid$TPM), col = "honeydew1", main = "TPM")
-hist(log(model$TPM), col = "honeydew1", main = "TPM")
-hist(log(model$length), col = "honeydew1", main = "all transcripts - length")
+#hist(log(diploid$TPM), col = "honeydew1", main = "TPM")
+#hist(log(model$TPM), col = "honeydew1", main = "TPM")
+#hist(log(model$length), col = "honeydew1", main = "all transcripts - length")
 
 print(paste("Fraction not observed", length(which(diploid$TPM == 0))/ nrow(diploid)))
-hist(log(diploid$length[which(diploid$TPM > 0)]), col = "honeydew1", main = "observed transcripts - length")
+#hist(log(diploid$length[which(diploid$TPM > 0)]), col = "honeydew1", main = "observed transcripts - length")
 
 
 head(diploid)
@@ -115,10 +133,13 @@ colnames(fusions) = colnames(diploid)
 # calculate fraction reads for fusions
 fusionReads = sum(fusions$TPM)*targetDepth
 otherReads = sum(as.numeric(diploid$TPM))*targetDepth
-print(paste('Number of fusion reads to simulate:', fusionReads, sep = ' '))
-print(paste('Number of other reads to simulate:', otherReads, sep = ' '))
+print(paste('Number of fusion reads to simulate:', round(fusionReads), sep = ' '))
+print(paste('Number of other reads to simulate:', round(otherReads), sep = ' '))
 sum(fusionReads, otherReads)/1e6
 sum(fusions$TPM, as.numeric(diploid$TPM))/1e6
+
+
+
 
 
 write.table(diploid, file = outpath, append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
