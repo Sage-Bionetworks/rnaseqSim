@@ -49,6 +49,34 @@ def postProcessReads(simName, totalReads, simReads, memory="100M", cores=1, disk
 	print cmd
 	subprocess.call(cmd, shell = True)
 	
+	
+
+def makeIsoformsTruth(simName, memory="100M", cores=1, disk="50M"):
+	'''Takes in RSEM isoforms.results file from diploid simulation.'''
+	
+	cmd = ' '.join(['sort', simName+'_diploid.sim.isoforms.results >', simName+'_diploid.sim.isoforms.results_sorted'])
+	print cmd
+	subprocess.call(cmd, shell = True)
+	
+	truthFH = open(simName+'_isoforms_truth.txt', 'w')
+	with open(simName+'_diploid.sim.isoforms.results_sorted', 'r') as rsem:
+		line1 = None
+		for line in rsem:
+			if not line.startswith('ENST'): continue
+			if line1 is None:
+				line1 = line
+			else:
+				# check that transcript ids match
+				line1v = line1.strip().split()
+				line2v = line.strip().split()
+				if not line1v[0].split('-')[0] == line2v[0].split('-')[0]:
+					print 'Line matching off %s %s' % (line1v[0], line2v[0])
+					break
+				else:
+					summedTPM = float(line1v[5]) + float(line2v[5])
+					truthFH.write('%s\t%f' % (line1v[0].split('-')[0], summedTPM))
+				line1 = None
+	truthFH.close()
 
 
 
@@ -143,4 +171,5 @@ if __name__=="__main__":
 	## Wrap jobs
 	generateReads(model=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=args.numSimReads, otherReads=args.totalReads-args.numSimReads)
 	postProcessReads(simName=args.simName, totalReads=args.totalReads, simReads=args.numSimReads)
+	makeIsoformsTruth(simName=args.simName)
 	
