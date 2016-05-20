@@ -39,13 +39,13 @@ def postProcessReads(simName, totalReads, simReads, memory="100M", cores=1, disk
 	fusionR2 = simName+'_fusions_2.fq'
 	
 	renameAndMerge(diploid = diploidR1, fusion = fusionR1, inserts = insertPosition, keyFileName = simName+'_readKey_1.txt', fastqFileName = simName+'_merged_1.fq')
-	cmd = ' '.join(['sort -k1,1', simName+'_merged_1.fq', '| sed -e \'s/\\t/\\n/g\' - | gzip >', simName+'_mergeSort_1.fq.gz'])
+	cmd = ' '.join(['sort -T tmp -k1,1', simName+'_merged_1.fq', '| sed -e \'s/\\t/\\n/g\' - | gzip >', simName+'_mergeSort_1.fq.gz'])
 	print cmd
 	subprocess.call(cmd, shell = True)
 	
 	
 	renameAndMerge(diploid = diploidR2, fusion = fusionR2, inserts = insertPosition, keyFileName = simName+'_readKey_2.txt', fastqFileName = simName+'_merged_2.fq')
-	cmd = ' '.join(['sort -k1,1', simName+'_merged_2.fq', '| sed -e \'s/\\t/\\n/g\' - | gzip >', simName+'_mergeSort_2.fq.gz'])
+	cmd = ' '.join(['sort -T tmp -k1,1', simName+'_merged_2.fq', '| sed -e \'s/\\t/\\n/g\' - | gzip >', simName+'_mergeSort_2.fq.gz'])
 	print cmd
 	subprocess.call(cmd, shell = True)
 	
