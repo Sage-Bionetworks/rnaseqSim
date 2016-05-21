@@ -21,8 +21,8 @@ expThreshold = args$expThresh
 targetDepth = args$targetDepth
 setwd(args$wd)
 
-outpath = paste(inpath, 'modDiploid', expThreshold, targetDepth, sep = "_")
-outpathFus = paste(inpath, 'modDiploidFusionOnly', expThreshold, targetDepth, sep = "_")
+outName = paste(basename(inpath), 'modDiploid', expThreshold, targetDepth, sep = "_")
+outNameFus = paste(basename(inpath), 'modDiploidFusionOnly', expThreshold, targetDepth, sep = "_")
 
 # Read in RSEM model
 model = read.delim(inpath)
@@ -121,5 +121,5 @@ sum(fusionReads, otherReads)/1e6
 sum(fusions$TPM, as.numeric(diploid$TPM))/1e6
 
 
-write.table(diploid, file = outpath, append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
-write.table(fusions, file = outpathFus, append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
+write.table(diploid, file = paste(args$wd, outName, sep = "/"), append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
+write.table(fusions, file = paste(args$wd, outNameFus, sep = "/"), append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
