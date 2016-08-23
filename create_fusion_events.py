@@ -35,40 +35,63 @@ def filterFusionEvents(numEvents, minLength, simName, memory="100M", cores=1, di
 	filteredFusimEvents = list()
 	allFastaFilenames = '' # Needed for RSEM reference creation later
 
-	inputFusim = simName+'.fasta'				
-	outfile = ''.join([simName, '_filtered', '.gtf'])
-	with open(outfile, 'w') as gtf:
-		for record in SeqIO.parse(inputFusim, "fasta") :
-			if len(filteredFusimEvents) >= numEvents: break
-			temp = record.id.split("|")[1] # Specific to FUSIM inputs
-			record.id = temp
-			record.annotations.update(parseFusimFastaDescription(record.description))
-
-			# Filter out acceptor genes that start with exon 0
-			if record.annotations['exonIndex2'].startswith('0,'): continue
-			# Transcript length filter
-			if len(record) > minLength:
-			
-				filteredFusimEvents.append(record)
-
-				# Write accepted events to GTF
-				writeGTF(record_id=record.id,record_len=len(record),GTFfh=gtf)
-				
-				# Write out separate fasta files per seq
-				fastaFilename = '.'.join([record.id, 'fasta'])
-				allFastaFilenames += fastaFilename+','
-				numWritten = SeqIO.write(record, fastaFilename, "fasta")
-	gtf.close()
-	
 	# Get exon start/end sites from TXT output file
 	moreAnnotations = parseFusimTxtOutput(simName+'fusions.txt')
-	with open(simName+'_filtered.bedpe', 'w') as bedpe:
+
+	inputFusim = simName+'.fasta'				
+	for record in SeqIO.parse(inputFusim, "fasta") :
+		if len(filteredFusimEvents) == numEvents: break
+		temp = record.id.split("|")[1] # Specific to FUSIM inputs
+		record.id = temp
+		record.annotations.update(parseFusimFastaDescription(record.description))
+		record.annotations.update(moreAnnotations[record.id])
+
+		# Filter out acceptor genes that start with exon 0 for + strand acceptors,
+		# or donor genes that start (end) with 0 for - strand.
+		if record.annotations['exonIndex2'].startswith('0') and record.annotations['strand2'] is '+': continue
+		if record.annotations['exonIndex1'].startswith('0') and record.annotations['strand1'] is '-': continue
+		
+		# Filter out acceptor genes that include 3'-most exon for - strand acceptors (START codon),
+		# or donor genes that end (start) with 3'-most exon (STOP codon) for + strand.
+		(transA, transB) = record.id.split('-')
+		if record.annotations['strand1'] == "+":
+			record.annotations['geneAjunc'] = max(record.annotations['exonEnds1'].split(','))
+			if checkAgainstRefFlat(transA,record.annotations['geneAjunc'] ,start=False) is None: continue
+		else:
+			record.annotations['geneAjunc'] = max(record.annotations['exonStarts1'].split(','))
+			if checkAgainstRefFlat(transA,record.annotations['geneAjunc'] ,start=True) is None:  continue
+		if record.annotations['strand2'] == "+":
+			record.annotations['geneBjunc'] = min(record.annotations['exonStarts2'].split(','))
+			if checkAgainstRefFlat(transB,record.annotations['geneBjunc'] ,start=True) is None: continue
+		else: 
+			record.annotations['geneBjunc'] = min(record.annotations['exonEnds2'].split(','))
+			if checkAgainstRefFlat(transB,record.annotations['geneBjunc'] ,start=False) is None: continue
+
+		
+		# Transcript length filter
+		if len(record) > minLength:
+			filteredFusimEvents.append(record)
+
+	if len(filteredFusimEvents) is not numEvents:
+		print('Number of filtered events: '+len(filteredFusimEvents))
+		
+		
+	with open(simName+'_filtered.gtf', 'w') as gtf, open(simName+'_filtered.bedpe', 'w') as bedpe:
+
 		for record in filteredFusimEvents:
-			record.annotations.update(moreAnnotations[record.id])
+
+			# Write accepted events to GTF and BEDPE
+			writeGTF(record_id=record.id,record_len=len(record),GTFfh=gtf)
 			writeBEDPE(record.annotations,record.id,bedpe)
+		
+			# Write out separate fasta files per seq
+			fastaFilename = '.'.join([record.id, 'fasta'])
+			allFastaFilenames += fastaFilename+','
+			numWritten = SeqIO.write(record, fastaFilename, "fasta")
+	gtf.close()
 	bedpe.close()
 
-# 	return(allFastaFilenames)
+ 	return(allFastaFilenames)
 	
 	
 
@@ -154,40 +177,32 @@ def writeBEDPE(record_annotations,record_id,BEDPEfh):
 	""""Writes a BEDPE entry for a gene fusion junction.
 Note that FUSIM txt output is 1-based, although input refflat is 0-based.
 	"""
+	
 	(transA, transB) = record_id.split('-')
-	if record_annotations['strand1'] == "+":
-		geneApos = max(record_annotations['exonEnds1'].split(','))
-#		assert parseGTF(transA,geneApos,start=False) is not None # fails when end position is in column 8 (1-based) of genepred refflat.
-	else:
-		geneApos = max(record_annotations['exonStarts1'].split(','))
-#		assert parseGTF(transA,geneApos,start=True) is not None # Looks like same exception as above
-	if record_annotations['strand2'] == "+":
-		geneBpos = min(record_annotations['exonStarts2'].split(','))
-#		assert parseGTF(transB,geneBpos,start=True) is not None
-	else: 
-		geneBpos = min(record_annotations['exonEnds2'].split(','))
-		assert parseGTF(transB,geneBpos,start=False) is not None
-
 	# subtract 1 from upstream position to be consistent with BED 0-based numbering	
-	upstreamA = int(geneApos) - 1
-	upstreamB = int(geneBpos) - 1
+	upstreamA = int(record_annotations['geneAjunc']) - 1
+	upstreamB = int(record_annotations['geneBjunc']) - 1
 #	bedpeTxt = '\t'.join([geneA[3], str(upstreamA), geneApos, geneB[3], str(upstreamB), geneBpos, geneA[0], '0', geneA[4], geneB[4], getHGNC(nameA), getHGNC(nameB)])
-	bedpeTxt = '\t'.join([record_annotations['chrom1'], str(upstreamA), geneApos, record_annotations['chrom2'], str(upstreamB), geneBpos, record_annotations['fusionGene'], '0', record_annotations['strand1'], record_annotations['strand2']])
+	bedpeTxt = '\t'.join([record_annotations['chrom1'], str(upstreamA), record_annotations['geneAjunc'], record_annotations['chrom2'], str(upstreamB), record_annotations['geneBjunc'], record_annotations['fusionGene'], '0', record_annotations['strand1'], record_annotations['strand2']])
 	BEDPEfh.write(bedpeTxt+'\n')
 	
 
 
-def parseGTF(inENST,inPos,start=True):
-
+def checkAgainstRefFlat(inENST,inPos,start=True):
+	'''Check to see whether junction endpoints (1-based) match the refflat file (0-based). Also filter out certain cases of 
+	unacceptable donor/acceptor candidates.
+	'''
 	refFlatBytes = subprocess.check_output(' '.join(['grep', inENST, referenceGeneModels]), shell = True)
 	refflatLine = refFlatBytes.decode("utf-8").strip().split()
 	if start:
 		# subtract 1 to compare with 0-based refflat start positions
-		print('inPos '+str(int(inPos)-1), refflatLine[9])
 		return(re.search(str(int(inPos)-1), refflatLine[9]))
 	else:
-		print('inPos '+inPos, refflatLine[10])
-		return(re.search(inPos, refflatLine[10]))
+		if inPos == refflatLine[7]: return(None) # This line to remove cases where the stop codon exon is a donor 
+													# for the plus strand, or the start codon is an acceptor for 
+													# the minus strand. Checks for whether the position of interest
+													# matches the end of the CDS.
+		else: return(re.search(inPos, refflatLine[10]))
 
 
 
