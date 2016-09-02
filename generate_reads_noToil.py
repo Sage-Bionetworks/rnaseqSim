@@ -74,7 +74,7 @@ def makeIsoformsTruth(simName, memory="100M", cores=1, disk="50M"):
 					break
 				else:
 					summedTPM = float(line1v[5]) + float(line2v[5])
-					truthFH.write('%s\t%f' % (line1v[0].split('-')[0], summedTPM))
+					truthFH.write('%s\t%f\n' % (line1v[0].split('-')[0], summedTPM))
 				line1 = None
 	truthFH.close()
 
