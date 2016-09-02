@@ -56,16 +56,16 @@ def filterFusionEvents(numEvents, minLength, simName, memory="100M", cores=1, di
 		(transA, transB) = record.id.split('-')
 		if record.annotations['strand1'] == "+":
 			record.annotations['geneAjunc'] = max(record.annotations['exonEnds1'].split(','))
-			if checkAgainstRefFlat(transA,record.annotations['geneAjunc'] ,start=False) is None: continue
+#			if checkAgainstRefFlat(transA,record.annotations['geneAjunc'] ,start=False) is None: continue
 		else:
-			record.annotations['geneAjunc'] = max(record.annotations['exonStarts1'].split(','))
-			if checkAgainstRefFlat(transA,record.annotations['geneAjunc'] ,start=True) is None:  continue
+			record.annotations['geneAjunc'] = min(record.annotations['exonStarts1'].split(','))
+#			if checkAgainstRefFlat(transA,record.annotations['geneAjunc'] ,start=True) is None:  continue
 		if record.annotations['strand2'] == "+":
 			record.annotations['geneBjunc'] = min(record.annotations['exonStarts2'].split(','))
-			if checkAgainstRefFlat(transB,record.annotations['geneBjunc'] ,start=True) is None: continue
+#			if checkAgainstRefFlat(transB,record.annotations['geneBjunc'] ,start=True) is None: continue
 		else: 
-			record.annotations['geneBjunc'] = min(record.annotations['exonEnds2'].split(','))
-			if checkAgainstRefFlat(transB,record.annotations['geneBjunc'] ,start=False) is None: continue
+			record.annotations['geneBjunc'] = max(record.annotations['exonEnds2'].split(','))
+#			if checkAgainstRefFlat(transB,record.annotations['geneBjunc'] ,start=False) is None: continue
 
 		
 		# Transcript length filter
@@ -73,7 +73,7 @@ def filterFusionEvents(numEvents, minLength, simName, memory="100M", cores=1, di
 			filteredFusimEvents.append(record)
 
 	if len(filteredFusimEvents) is not numEvents:
-		print('Number of filtered events: '+len(filteredFusimEvents))
+		print('Number of filtered events: '+str(len(filteredFusimEvents)))
 		
 		
 	with open(simName+'_filtered.gtf', 'w') as gtf, open(simName+'_filtered.bedpe', 'w') as bedpe:
@@ -90,8 +90,8 @@ def filterFusionEvents(numEvents, minLength, simName, memory="100M", cores=1, di
 			numWritten = SeqIO.write(record, fastaFilename, "fasta")
 	gtf.close()
 	bedpe.close()
-
- 	return(allFastaFilenames)
+	
+	return(allFastaFilenames)
 	
 	
 
