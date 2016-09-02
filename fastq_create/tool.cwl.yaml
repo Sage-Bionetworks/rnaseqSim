@@ -1,0 +1,28 @@
+
+cwlVersion: v1.0
+class: Workflow
+
+requirements: 
+  DockerRequirement:
+    dockerPull: smcrna/rsem-simulator
+
+
+inputs:
+  GENOME:
+    type: 
+      type: array
+      items: File
+    inputBinding:
+      position: 1
+
+outputs:
+  FASTQ_1:
+    type: File
+    outputBinding:
+      glob: out.1.fastq
+  FASTQ_2:
+    type: File
+    outputBinding:
+      glob: out.2.fastq
+
+baseCommand: /opt/fusion_gen.py

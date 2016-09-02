@@ -13,3 +13,21 @@ modify_model_tpm_for_diploid.R
 
 Step 4: Generate reads from diploid and fusion references.
 run_RSEM_for_reads.sh
+
+
+
+Simulate Fusion Events
+- Selection of the two genes select the exons within that will form the breakpoint boundary
+- Output 'FusionGene Object'
+- Filtering after generating events
+- Writing out GTF file
+- Writing out BEDp truth file
+
+
+Get Isoform Expression Profiles
+
+
+Simulate Reads
+
+
+
