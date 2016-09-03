@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import os
 from glob import glob
 import synapseclient
@@ -30,7 +31,7 @@ class Config:
                 args[k] = self.syn.get(self.config[v]).path
         
         print module_dir, args
-        
+        sys.path.append(module_dir)
         mod = imp.load_source('sim_runner.%s' % (module), os.path.join(module_dir, "module.py"))
         out = mod.run_module(**args)
         
@@ -40,7 +41,10 @@ def command_run(args):
     
     config = Config(syn, args.config_file)
     
-    config.call_module('fusion_create', gtf_file='gtf_syn', genome_file='genome_syn')
+    fusion_output = config.call_module('fusion_create', gtf_file='gtf_syn', genome_file='genome_syn')
+    #config.call_module('genome_create', gtf_file='gtf_syn', genome_file='genome_syn')
+    #config.call_module('isoform_create', gtf_file='gtf_syn', genome_file='genome_syn')
+    #config.call_module('fastq_create', gtf_file='gtf_syn', genome_file='genome_syn')
     
 
 
