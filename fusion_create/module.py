@@ -1,31 +1,37 @@
 
 import sys
-import gzip
-import gtf
-import random
+#import gzip
+import gffutils
+
+
 def run_module(genome_file, gtf_file):
-    in_handle = gzip.GzipFile(gtf_file)
-    g = gtf.GTF()
-    g.read(in_handle)
 
-    transcripts = g.transcript_collect()
+	# Converting GTF file into a database
+    database_filename = '.'.join([gtf_file.rstrip('gtf'), 'sqlite3'])    
 
-    for i in range(100):
-        fgene = [ 
-            transcripts[random.choice(transcripts.keys())],
-            transcripts[random.choice(transcripts.keys())]
-        ]
-        
-        for j in fgene:
-            exons = sorted( list(k for k in j if 'exon_number' in k.attribute), key=lambda x: int(x.attribute['exon_number']) )
-            
-            print j[0].attribute['gene_name'], ",".join( 
-                ("%s(%s:%s-%s:%s)" % (k.attribute['exon_number'], k.reference, k.start, k.end, k.strand) for k in exons)
-                )
-
-        print "-=-=-"
+    try:
+	    # Connect to an already-existing db
+	    db = gffutils.FeatureDB(database_filename)
+	except FileNotFoundError:
+		# Or, create a new one
+		db = gffutils.create_db(gtf_file,database_filename)
     
+    
+    # Filter the gene types to consider, e.g. protein-coding
+    protein_coding_genes = list()
+    allGenesGen = db.somefunction(,)
+	for item in allGenesGen:
+		if item['gene_biotype'] is 'protein_coding':
+			protein_coding_genes.append(item['Name'])
 
+	# Get the number of genes available after filtering    
+    number_genes = 
+
+	# Get the transcripts for a gene, returns generator
+	transcripts = db.children(ENSG,featuretype = "transcript")
+	protein_coding_transcripts = list()
+	for item in transcripts:
+		
 
 if __name__ == '__main__':
     run_module(sys.argv[1], sys.argv[2])
