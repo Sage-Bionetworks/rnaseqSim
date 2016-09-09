@@ -19,8 +19,8 @@ def run_module(genome_file, gtf_file):
     
     # Filter the gene types to consider, e.g. protein-coding
     protein_coding_genes = list()
-    allGenesGen = db.somefunction(,)
-	for item in allGenesGen:
+    allGenesIter = db.features_of_type("gene")
+	for item in allGenesIter:
 		if item['gene_biotype'] is 'protein_coding':
 			protein_coding_genes.append(item['Name'])
 
