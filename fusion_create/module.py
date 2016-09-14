@@ -3,6 +3,7 @@ import sys
 import os
 #import gzip
 import gffutils
+import fusions
 
 
 def run_module(genome_file, gtf_file):
@@ -27,16 +28,12 @@ def run_module(genome_file, gtf_file):
 
    # Get the number of genes available after filtering    
    print(' '.join(['Number of protein-coding genes:', str(len(protein_coding_genes))]))
-
-   # Get the transcripts for a gene, returns generator
-   ENSG = 'ENSG00000239713'
-   transcripts = db.children(ENSG,featuretype = "transcript")
-   # Put the protein-coding transcripts in a list
-   protein_coding_transcripts = list()
-   for item in transcripts:
-      if item.source == 'protein_coding':
-         protein_coding_transcripts.append(item)
-   print(' '.join(['Number of protein-coding transcripts for gene', ENSG+':', str(len(protein_coding_transcripts))]))
-
+   
+   # Get fusion events
+   fusionEvents = fusions.getRandomFusions(db=db, names=protein_coding_genes, num=10)
+   for event in fusionEvents:
+      print(event)
+   
+   
 if __name__ == '__main__':
-   run_module(sys.argv[1], sys.argv[2])
+   run_module(genome_file=sys.argv[1], gtf_file=sys.argv[2])
