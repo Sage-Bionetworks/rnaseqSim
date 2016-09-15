@@ -30,9 +30,16 @@ def run_module(genome_file, gtf_file):
    print(' '.join(['Number of protein-coding genes:', str(len(protein_coding_genes))]))
    
    # Get fusion events
-   fusionEvents = fusions.getRandomFusions(db=db, names=protein_coding_genes, num=10)
+   fusionEvents = fusions.getRandomFusions(db=db, names=protein_coding_genes, num=1000)
    for event in fusionEvents:
-      print(event)
+      donorSeq,acceptorSeq = fusions.convertToSeqObj(event)
+ #     print(donorSeq,acceptorSeq)
+      print('donor',donorSeq.qualifiers['seqid'][0], donorSeq.qualifiers['junctionExonNum'][0],donorSeq.qualifiers['source'][0],donorSeq.strand)
+      print('acceptor',acceptorSeq.qualifiers['seqid'][0], acceptorSeq.qualifiers['junctionExonNum'][0],acceptorSeq.qualifiers['source'][0],acceptorSeq.strand)
+    
+   
+   # Convert fusion events into tuples of Bio.Seq objects 
+
    
    
 if __name__ == '__main__':

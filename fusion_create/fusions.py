@@ -1,6 +1,7 @@
-import gffutils
 import random
 import time
+import gffutils
+from gffutils import biopython_integration
 
 MAX_TOSS_NUM = 100
 
@@ -10,7 +11,10 @@ def getTranscript(db, gene):
     for item in db.children(gene,featuretype = "transcript"):
         if item.source == 'protein_coding':
             trans.append(item)
-    tId = random.randint(0,len(trans)-1)
+    if (len(trans) == 0):
+    	return None,None
+    else:
+    	tId = random.randint(0,len(trans)-1)
     return trans[tId].strand,trans[tId]['transcript_id'][0]
     
     
@@ -19,13 +23,13 @@ def getJunctionAtExonBoundary(db, tranId, strand, isDonor):
     for item in db.children(tranId, featuretype='exon', order_by='start'):
         exons.append(item)
     if len(exons)-2 < 0:
-        return False,0
+        return False,999,999
     if (strand == '+' and isDonor) or (strand == '-' and (not isDonor)):    #Kristen: please check all the genes has '+' or '-' not '.'
         eId = random.randint(0,len(exons)-2)
-        return True,exons[eId].end
+        return True,exons[eId].end,eId
     else:
         eId = random.randint(1,len(exons)-1)
-        return True,exons[eId].start     #Kristen: please check it is 1 based or 0 based
+        return True,exons[eId].start,eId     #gffutils is 1-based
 
 
 def isStay(pStay):
@@ -77,15 +81,21 @@ def getRandomFusions(db, names, num=20, pStay=0.0):
             # Choose transcripts
             dStrand,dTran = getTranscript(db, dGene)
             aStrand,aTran = getTranscript(db, aGene)
+            if (dTran is None) or (aTran is None): continue
             # Choose junctions
-            dIsSucess,dJunction = getJunctionAtExonBoundary(db, dTran, dStrand, True)
-            aIsSucess,aJunction = getJunctionAtExonBoundary(db, aTran, aStrand, False)             
+            dIsSucess,dJunction,dEid = getJunctionAtExonBoundary(db, dTran, dStrand, True)
+            aIsSucess,aJunction,aEid = getJunctionAtExonBoundary(db, aTran, aStrand, False)             
             if dIsSucess and aIsSucess:
-                res.append({'donorTranId':dTran, 'acceptorTranId':aTran, 'donorJunction':dJunction, 'acceptorJunction':aJunction })
+                donor = db[dTran]
+                donor['donorJunction'] = dJunction
+                donor['junctionExonNum'] = dEid
+                acceptor = db[aTran]
+                acceptor['acceptorJunction'] = aJunction
+                acceptor['junctionExonNum'] = aEid
+                res.append({'donor':donor, 'acceptor':acceptor })
                 #print dTran,aTran,dJunction,aJunction    #for test purpose
                 
                 total = total + 1
-                print(total)
             else:            
                tossed2 = tossed2  + 1
                if tossed2 > MAX_TOSS_NUM:
@@ -94,3 +104,10 @@ def getRandomFusions(db, names, num=20, pStay=0.0):
     return(res)
      
 
+def convertToSeqObj(fusionDict):
+   """Converts results into Seq objects."""
+   
+   donorSeq = biopython_integration.to_seqfeature(fusionDict['donor'])
+   acceptorSeq = biopython_integration.to_seqfeature(fusionDict['acceptor'])
+   return donorSeq,acceptorSeq
+   
