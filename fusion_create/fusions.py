@@ -17,8 +17,8 @@ def getTranscript(db, gene):
     	tId = random.randint(0,len(trans)-1)
     return trans[tId].strand,trans[tId]['transcript_id'][0]
     
-    
 def getJunctionAtExonBoundary(db, tranId, strand, isDonor):
+# TODO: figure out why this is sometimes returning empty lists    
     exons = []
     for item in db.children(tranId, featuretype='exon', order_by='start'):
         exons.append(item)
@@ -26,10 +26,12 @@ def getJunctionAtExonBoundary(db, tranId, strand, isDonor):
         return False,999,999
     if (strand == '+' and isDonor) or (strand == '-' and (not isDonor)):    #Kristen: please check all the genes has '+' or '-' not '.'
         eId = random.randint(0,len(exons)-2)
-        return True,exons[eId].end,eId
+        fusExons = exons[0:eId]
+        return True,exons[eId].end,fusExons
     else:
         eId = random.randint(1,len(exons)-1)
-        return True,exons[eId].start,eId     #gffutils is 1-based
+        fusExons = exons[eId:]
+        return True,exons[eId].start,fusExons     #gffutils is 1-based
 
 
 def isStay(pStay):
@@ -41,7 +43,7 @@ def isStay(pStay):
         return False
 
 
-def getRandomFusions(db, names, num=20, pStay=0.0):
+def getRandomFusions(db, names, num=10, pStay=0.0):
     # db is the database from module.py 
     # names is a vector of the ENSG gene ids (protein coding genes only) from module.py
     # num: number of fusions to simulate
@@ -83,19 +85,24 @@ def getRandomFusions(db, names, num=20, pStay=0.0):
             aStrand,aTran = getTranscript(db, aGene)
             if (dTran is None) or (aTran is None): continue
             # Choose junctions
-            dIsSucess,dJunction,dEid = getJunctionAtExonBoundary(db, dTran, dStrand, True)
-            aIsSucess,aJunction,aEid = getJunctionAtExonBoundary(db, aTran, aStrand, False)             
+            dIsSucess,dJunction,dExons = getJunctionAtExonBoundary(db, dTran, dStrand, True)
+            aIsSucess,aJunction,aExons = getJunctionAtExonBoundary(db, aTran, aStrand, False)             
             if dIsSucess and aIsSucess:
-                donor = db[dTran]
-                donor['donorJunction'] = dJunction
-                donor['junctionExonNum'] = dEid
-                acceptor = db[aTran]
-                acceptor['acceptorJunction'] = aJunction
-                acceptor['junctionExonNum'] = aEid
-                res.append({'donor':donor, 'acceptor':acceptor })
+#                 donor = db[dTran]
+#                 donor['donorJunction'] = dJunction
+#                 acceptor = db[aTran]
+#                 acceptor['acceptorJunction'] = aJunction
+                dExonSF = list()
+                aExonSF = list()
+                for exon in dExons:
+                   dExonSF.append(biopython_integration.to_seqfeature(exon))
+                for exon in aExons:
+                   aExonSF.append(biopython_integration.to_seqfeature(exon))
+                if (len(dExonSF) > 0) and (len(aExonSF) > 0):
+                   res.append({'donorExons':dExonSF,'acceptorExons':aExonSF })
                 #print dTran,aTran,dJunction,aJunction    #for test purpose
                 
-                total = total + 1
+                   total = total + 1
             else:            
                tossed2 = tossed2  + 1
                if tossed2 > MAX_TOSS_NUM:
@@ -103,11 +110,3 @@ def getRandomFusions(db, names, num=20, pStay=0.0):
                   exit(1)
     return(res)
      
-
-def convertToSeqObj(fusionDict):
-   """Converts results into Seq objects."""
-   
-   donorSeq = biopython_integration.to_seqfeature(fusionDict['donor'])
-   acceptorSeq = biopython_integration.to_seqfeature(fusionDict['acceptor'])
-   return donorSeq,acceptorSeq
-   
