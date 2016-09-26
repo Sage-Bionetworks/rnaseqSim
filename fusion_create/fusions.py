@@ -16,6 +16,7 @@ def getTranscript(db, gene):
     else:
     	tId = random.randint(0,len(trans)-1)
     return trans[tId].strand,trans[tId]['transcript_id'][0]
+
     
 def getJunctionAtExonBoundary(db, tranId, strand, isDonor):
 # TODO: figure out why this is sometimes returning empty lists    
@@ -43,7 +44,7 @@ def isStay(pStay):
         return False
 
 
-def getRandomFusions(db, names, num=10, pStay=0.0):
+def getRandomFusions(db, names, num=5, pStay=0.0):
     # db is the database from module.py 
     # names is a vector of the ENSG gene ids (protein coding genes only) from module.py
     # num: number of fusions to simulate
@@ -88,10 +89,6 @@ def getRandomFusions(db, names, num=10, pStay=0.0):
             dIsSucess,dJunction,dExons = getJunctionAtExonBoundary(db, dTran, dStrand, True)
             aIsSucess,aJunction,aExons = getJunctionAtExonBoundary(db, aTran, aStrand, False)             
             if dIsSucess and aIsSucess:
-#                 donor = db[dTran]
-#                 donor['donorJunction'] = dJunction
-#                 acceptor = db[aTran]
-#                 acceptor['acceptorJunction'] = aJunction
                 dExonSF = list()
                 aExonSF = list()
                 for exon in dExons:
@@ -99,8 +96,8 @@ def getRandomFusions(db, names, num=10, pStay=0.0):
                 for exon in aExons:
                    aExonSF.append(biopython_integration.to_seqfeature(exon))
                 if (len(dExonSF) > 0) and (len(aExonSF) > 0):
-                   res.append({'donorExons':dExonSF,'acceptorExons':aExonSF })
-                #print dTran,aTran,dJunction,aJunction    #for test purpose
+                	# adjust junction positions to be 0-based
+                   res.append({'donorExons':dExonSF,'acceptorExons':aExonSF,'dJunction':dJunction-1,'aJunction':aJunction-1})
                 
                    total = total + 1
             else:            
