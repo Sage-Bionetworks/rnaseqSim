@@ -5,6 +5,7 @@ import os
 import gffutils
 import fusions
 import seqobjs
+from Bio import SeqIO
 
 
 def run_module(genome_file, gtf_file):
@@ -32,15 +33,15 @@ def run_module(genome_file, gtf_file):
     
     hg19 = seqobjs.readGenome(sys.argv[1])    
 
+    with open('test.gtf','w') as gtf, open('test.bedpe','w') as bedpe:
     # Get fusion events as tuples of Bio.Seq objects
     # Need to simplify return objects, possibly returning one event at a time instead of list
-    for event in fusions.getRandomFusions(db=db, names=protein_coding_genes):
-#        print('donor', event['donorExons'][0].qualifiers['seqid'][0], event['donorExons'][0].id, event['donorExons'][0].strand)
-#        print('acceptor',acceptorSeq.qualifiers['seqid'][0], acceptorSeq.id,acceptorSeq.qualifiers['source'][0],acceptorSeq.strand)
-        fObj = seqobjs.makeFusionSeqObj(donorExonSeq=event['donorExons'], acceptorExonSeq=event['acceptorExons'], genomeObj=hg19)
-        print(fObj.id)     
-        
-
+       for event in fusions.getRandomFusions(db=db, names=protein_coding_genes):
+           fObj = seqobjs.makeFusionSeqObj(donorExonSeq=event['donorExons'], acceptorExonSeq=event['acceptorExons'], dJunc=event['dJunction'],aJunc=event['aJunction'],genomeObj=hg19)
+           print(fObj)
+           seqobjs.writeGTF(fObj,gtf)
+           seqobjs.writeBEDPE(fObj,bedpe)
+           SeqIO.write(fObj, ''.join([fObj.id,'.fasta']), "fasta")
     
     
     
