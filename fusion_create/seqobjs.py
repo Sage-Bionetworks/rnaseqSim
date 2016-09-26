@@ -10,7 +10,7 @@ def readGenome(fasta):
    return(genome_dict)
    
    
-def makeFusionSeqObj(donorExonSeq,acceptorExonSeq,genomeObj):
+def makeFusionSeqObj(donorExonSeq,acceptorExonSeq,dJunc,aJunc,genomeObj):
 
    dName = donorExonSeq[0].qualifiers['transcript_id'][0]
    aName = acceptorExonSeq[0].qualifiers['transcript_id'][0]
@@ -26,8 +26,8 @@ def makeFusionSeqObj(donorExonSeq,acceptorExonSeq,genomeObj):
    fusionObj.annotations['aStrand'] = acceptorExonSeq[0].strand
    fusionObj.annotations['dChrom'] = donorChrom
    fusionObj.annotations['aChrom'] = acceptorChrom
-   fusionObj.annotations['dJunction'] = 99
-   fusionObj.annotations['aJunction'] = 99
+   fusionObj.annotations['dJunction'] = dJunc
+   fusionObj.annotations['aJunction'] = aJunc
    return(fusionObj)
    
    
@@ -36,20 +36,18 @@ def concatExonSeq(exonList,genomeObj):
 
    chrom = exonList[0].qualifiers['seqid'][0]
    fusion_seq = ''
-   if exonList[0].strand == 1:
-      for exon in exonList:
-         fusion_seq = fusion_seq + exon.extract(genomeObj[chrom])
-         printExonSF(exon)
-   else:
+   if exonList[0].strand == '-1':
       exonList.reverse()
-      for exon in exonList:
-         fusion_seq = fusion_seq + exon.extract(genomeObj[chrom])
-         printExonSF(exon)
+   for exon in exonList:
+      tmp_seq = exon.extract(genomeObj[chrom])
+      printExonSF(exon,tmp_seq)
+      fusion_seq = fusion_seq + tmp_seq
+   return(fusion_seq)
 
 
-def printExonSF(exonSF):
+def printExonSF(exonSF,seq):
 
-   print(exonSF.qualifiers['exon_id'], exonSF.location.start, exonSF.location.end, exonSF.qualifiers['exon_number'], exonSF.id)
+   print(exonSF.qualifiers['exon_id'], exonSF.location.start, exonSF.location.end, exonSF.qualifiers['exon_number'], exonSF.id,str(seq))
 
 
 
@@ -74,8 +72,8 @@ def writeBEDPE(record,BEDPEfh):
    """"Writes a BEDPE entry for a gene fusion junction."""
    
    (transA, transB) = record.id.split('-')
-   # subtract 1 from upstream position to be consistent with BED 0-based numbering   
-   upstreamA = int(record.annotations['dJunction']) - 1
-   upstreamB = int(record.annotations['aJunction']) - 1
-   bedpeTxt = '\t'.join([record.annotations['dChrom'], str(upstreamA), record.annotations['dJunction'], record.annotations['aChrom'], str(upstreamB), record.annotations['aJunction'], record.annotations['fusionGene'], '0', record.annotations['dStrand'], record.annotations['aStrand']])
+   # add 1 to position to be consistent with BED 0-based numbering   
+   downstreamA = int(record.annotations['dJunction']) + 1
+   downstreamB = int(record.annotations['aJunction']) + 1
+   bedpeTxt = '\t'.join([str(record.annotations['dChrom']), str(record.annotations['dJunction']), str(downstreamA), str(record.annotations['aChrom']), str(record.annotations['aJunction']), str(downstreamB), record.id, '0', str(record.annotations['dStrand']), str(record.annotations['aStrand'])])
    BEDPEfh.write(bedpeTxt+'\n')
