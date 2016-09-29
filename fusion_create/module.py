@@ -8,7 +8,7 @@ import seqobjs
 from Bio import SeqIO
 
 
-def run_module(genome_file, gtf_file):
+def run_module(genome_file, gtf_file, numEvents):
 
     # Converting GTF file into a database
     database_filename = '.'.join([os.path.basename(gtf_file).rstrip('.gtf'), 'sqlite3'])     
@@ -36,9 +36,10 @@ def run_module(genome_file, gtf_file):
     with open('test.gtf','w') as gtf, open('test.bedpe','w') as bedpe:
     # Get fusion events as tuples of Bio.Seq objects
     # Need to simplify return objects, possibly returning one event at a time instead of list
-       for event in fusions.getRandomFusions(db=db, names=protein_coding_genes):
+       for event in fusions.getRandomFusions(db=db, names=protein_coding_genes, num=numEvents):
            fObj = seqobjs.makeFusionSeqObj(donorExonSeq=event['donorExons'], acceptorExonSeq=event['acceptorExons'], dJunc=event['dJunction'],aJunc=event['aJunction'],genomeObj=hg19)
-           print(fObj)
+           print(len(fObj))
+#           print(fObj)
            seqobjs.writeGTF(fObj,gtf)
            seqobjs.writeBEDPE(fObj,bedpe)
            SeqIO.write(fObj, ''.join([fObj.id,'.fasta']), "fasta")
@@ -46,4 +47,4 @@ def run_module(genome_file, gtf_file):
     
     
 if __name__ == '__main__':
-    run_module(genome_file=sys.argv[1], gtf_file=sys.argv[2])
+    run_module(genome_file=sys.argv[1], gtf_file=sys.argv[2],numEvents=int(sys.argv[3]))
