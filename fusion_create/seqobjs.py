@@ -37,7 +37,7 @@ def concatExonSeq(exonList,genomeObj):
 
     chrom = exonList[0].qualifiers['seqid'][0]
     fusion_seq = ''
-    if exonList[0].strand == '-1':
+    if exonList[0].strand == -1:
         exonList.reverse()
     for exon in exonList:
         tmp_seq = exon.extract(genomeObj[chrom])
