@@ -29,10 +29,12 @@ def getJunctionAtExonBoundary(db, tranId, strand, isDonor):
         eId = random.randint(0,len(exons)-2)
         fusExons = exons[0:eId]
         return True,exons[eId].end,fusExons
-    else:
+    elif (strand == '-' and isDonor) or (strand == '+' and (not isDonor)):
         eId = random.randint(1,len(exons)-1)
         fusExons = exons[eId:]
         return True,exons[eId].start,fusExons     #gffutils is 1-based
+    else:
+        return False,999,999
 
 
 def isStay(pStay):
