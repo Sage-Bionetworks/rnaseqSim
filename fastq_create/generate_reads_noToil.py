@@ -4,6 +4,8 @@ import subprocess
 import argparse
 import os
 import random
+import shutil
+import synapseclient
 
     
 
@@ -12,15 +14,16 @@ import random
 ## Workflow functions
 ########################
 
-def generateReads(model, isoV, simName, fusRef, fusV, simReads, otherReads, memory="2G", cores=1, disk="15G"):
+def generateReads(modelID, isoV, simName, fusRef, fusV, simReads, otherReads, memory="2G", cores=1, disk="15G"):
 	'''Runs Fusim to generate fusion events.'''
 
 
-	cmd = ' '.join(['rsem-simulate-reads /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/diploid_reference_genome/STAR/GRCh37v75_diploid', model, isoV, '0.066', str(otherReads), simName+'_diploid'])
+	model = syn.get(modelID, downloadLocation = os.getcwd())
+	cmd = ' '.join(['rsem-simulate-reads /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/diploid_reference_genome/STAR/GRCh37v75_diploid', model.filePath, isoV, '0.066', str(otherReads), simName+'_diploid'])
 	print cmd
 	subprocess.call(cmd, shell = True)
 
-	cmd = ' '.join(['rsem-simulate-reads', fusRef, model, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
+	cmd = ' '.join(['rsem-simulate-reads', fusRef, model.filePath, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
 	print cmd
 	subprocess.call(cmd, shell = True)
 
@@ -38,6 +41,8 @@ def postProcessReads(simName, totalReads, simReads, memory="100M", cores=1, disk
 	fusionR1 = simName+'_fusions_1.fq'
 	fusionR2 = simName+'_fusions_2.fq'
 	
+	os.mkdir('tmp')
+	
 	renameAndMerge(diploid = diploidR1, fusion = fusionR1, inserts = insertPosition, keyFileName = simName+'_readKey_1.txt', fastqFileName = simName+'_merged_1.fq')
 	cmd = ' '.join(['sort -T tmp -k1,1', simName+'_merged_1.fq', '| sed -e \'s/\\t/\\n/g\' - | gzip >', simName+'_mergeSort_1.fq.gz'])
 	print cmd
@@ -48,6 +53,8 @@ def postProcessReads(simName, totalReads, simReads, memory="100M", cores=1, disk
 	cmd = ' '.join(['sort -T tmp -k1,1', simName+'_merged_2.fq', '| sed -e \'s/\\t/\\n/g\' - | gzip >', simName+'_mergeSort_2.fq.gz'])
 	print cmd
 	subprocess.call(cmd, shell = True)
+	
+	shutil.rmtree('tmp')
 	
 	
 
@@ -169,7 +176,7 @@ if __name__=="__main__":
 
 
 	## Wrap jobs
-	generateReads(model=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=args.numSimReads, otherReads=args.totalReads-args.numSimReads)
+	generateReads(modelID=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=args.numSimReads, otherReads=args.totalReads-args.numSimReads)
 	postProcessReads(simName=args.simName, totalReads=args.totalReads, simReads=args.numSimReads)
 	makeIsoformsTruth(simName=args.simName)
 	
