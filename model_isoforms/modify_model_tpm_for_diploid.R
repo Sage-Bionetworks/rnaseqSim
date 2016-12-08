@@ -5,30 +5,25 @@
 
 library(argparse)
 
+
 parser = ArgumentParser(description='Generate diploid TPM files for read simulation.')
 parser$add_argument('--TPM', dest="inpath", type="character", required=TRUE, help='Isoform TPM file from RSEM.')
 parser$add_argument('--gtf', type="character", required=TRUE, help='Gene models from which to simulate reads.')
-parser$add_argument('--expThresh', default = 2, type="double", help='Minimum log TPM value for fusion gene [default %(default)s].')
 parser$add_argument('--targetDepth', default = 20, type="integer", help='Total million reads to simulate [default %(default)s].')
 parser$add_argument('--wd', default = getwd(), type="character", help='Directory for output files [default %(default)s].')
+parser$add_argument('--codeDir', default = getwd(), type="character", help='Directory where R code functions file is located [default %(default)s].')
+
 
 
 args = parser$parse_args()
-
+source(paste(args$codeDir, 'isoExpFunctions.R', sep = "/"))
 inpath = args$inpath
 gtf = read.delim(args$gtf,header = FALSE)
-expThreshold = args$expThresh
 targetDepth = args$targetDepth
 setwd(args$wd)
 
-inpath = '~/Computing/SMC_RNA/new-sim/CPCG_0340.isoforms.results'
-gtf = read.delim('~/Computing/SMC_RNA/new-sim/sim35.gtf',header = FALSE)
-expThreshold = 2
-targetDepth = 60
-setwd('~/Computing/SMC_RNA/new-sim/')
-
-outName = paste(basename(inpath), 'modDiploid', expThreshold, targetDepth, sep = "_")
-outNameFus = paste(basename(inpath), 'modDiploidFusionOnly', expThreshold, targetDepth, sep = "_")
+outName = paste(basename(inpath), 'modDiploid', targetDepth, sep = "_")
+outNameFus = paste(basename(inpath), 'modDiploidFusionOnly', targetDepth, sep = "_")
 
 # Read in RSEM model
 model = read.delim(inpath)
@@ -45,7 +40,6 @@ hist(log(model$length), col = "honeydew1", main = "all transcripts - length")
 
 print(paste("Fraction not observed", length(which(model$TPM == 0))/ nrow(model)))
 print(paste("Fraction not observed", length(which(model$expected_count == 0))/ nrow(model)))
-#hist(log(model$length[which(model$TPM > 0)]), col = "honeydew1", main = "observed transcripts - length")
 
 
 
@@ -68,15 +62,11 @@ makeFusionMatrix=function(inGTF, inModel){
   return(fusions)
 }
 fusions = makeFusionMatrix(inGTF = gtf, inModel = altModel)
-head(fusions)
 
 
-# Get original expression of donor and acceptor transcripts; remove donors from main matrix of isoform values.
+# Remove donors from main matrix of isoform values.
 fusPartners = t(sapply(as.list(fusions$transcript_id),function(x) {unlist(strsplit(as.character(x),split = '-'))}))
 colnames(fusPartners) = c("donor", "acceptor")
-fusPartners
-fusPartnersExp = data.frame(donor = altModel$TPM[match(fusPartners[,1], altModel$transcript_id)], acceptor = altModel$TPM[match(fusPartners[,2], altModel$transcript_id)] )
-fusPartnersExp
 toRemove = match(fusPartners[,1], altModel$transcript_id)
 altModel = altModel[-toRemove,]
 
@@ -86,22 +76,26 @@ altModel = altModel[-toRemove,]
 medianNonZero = median(log(altModel$TPM[altModel$TPM > 0]))
 greaterThanMedian = altModel$TPM[log(altModel$TPM) > medianNonZero]
 names(greaterThanMedian) = altModel$transcript_id[log(altModel$TPM) > medianNonZero]
-fusionExp = sample(greaterThanMedian, size = nrow(fusions), replace = FALSE)
-hist(log(fusionExp), col = "honeydew")
+fusionExp = data.frame(sampled = sample(greaterThanMedian, size = nrow(fusions), replace = FALSE))
+hist(log(fusionExp$sampled), col = "honeydew")
 
+
+# Adjust fusion TPM and other TPM to sum to 1e6
+fractionalAdjustment = 1+(1-((sum(fusionExp$sampled) + sum(altModel$TPM)) / 1e6))
+fusionExp$adj = fusionExp$sampled * fractionalAdjustment
+altModel$TPM = altModel$TPM * fractionalAdjustment
+sum(altModel$TPM) + sum(fusionExp$adj)
 
 
 # Assign sampled expression values to fusions and originator transcripts.
 # Split summed exp value between fusion and donor allele according to splitVal distribution.
-fusionExpPlus = fusionExp + fusPartnersExp$donor #sum 
 splitVal = rnorm(n = nrow(fusPartners),mean = 0.5,sd = 0.03) # selects allelic distribution
-fusPartnersExp$fusionAllele = fusionExpPlus*splitVal
-fusPartnersExp$donorAllele = fusionExpPlus*(1-splitVal)
-head(fusPartnersExp)
-head(fusionExp)
+fusionExp$fusionAllele = fusionExp$adj*splitVal
+fusionExp$donorAllele = fusionExp$adj*(1-splitVal)
+
 
 # plot TPM vs length of fusions
-fusions[,6] = fusPartnersExp$fusionAllele
+fusions[,6] = fusionExp$fusionAllele
 plot(fusions[,3],log(fusions[,6]), xlab = "fusion length", ylab = "log TPM of fusion")
 colnames(fusions) = colnames(model)
 
@@ -122,43 +116,28 @@ sum(diploid$TPM)
 
 # Add back in the originator genes
 originators = model[toRemove,]
-originators$TPM = fusPartnersExp$donorAllele
-originators
-sum(diploid$TPM, originators$TPM)
-sum(originators$TPM)
-sum(fusPartnersExp$fusionAllele)
+originators$TPM = fusionExp$donorAllele
+sum(diploid$TPM, originators$TPM, fusionExp$fusionAllele)
 diploidAug = rbind(diploid, originators)
-
-fractionalAdjustment = sum(diploidAug$TPM) / (sum(diploidAug$TPM) + sum(fusions$TPM))
 
 
 # Plot
 hist(log(diploidAug$TPM), col = "honeydew1", main = "TPM")
 hist(log(altModel$TPM), col = "honeydew1", main = "TPM")
 hist(log(altModel$length), col = "honeydew1", main = "all transcripts - length")
-
 print(paste("Fraction not observed", length(which(diploidAug$TPM == 0))/ nrow(diploidAug)))
-#hist(log(diploid$length[which(diploid$TPM > 0)]), col = "honeydew1", main = "observed transcripts - length")
 
 
 
 # calculate fraction reads for fusions
 fusionReads = sum(fusions$TPM)*targetDepth
-
-
 otherReads = sum(as.numeric(diploidAug$TPM))*targetDepth
 print(paste('Number of fusion reads to simulate:', round(fusionReads), sep = ' '))
 print(paste('Number of other reads to simulate:', round(otherReads), sep = ' '))
 sum(fusionReads, otherReads)/1e6
 sum(fusions$TPM, as.numeric(diploidAug$TPM))/1e6
 
-
-head(diploidAug)
 diploidAug$TPM = formatC(x = diploidAug$TPM,digits = 4)
-head(diploidAug)
-
-
-
 
 write.table(diploid, file = paste(args$wd, outName, sep = "/"), append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
 write.table(fusions, file = paste(args$wd, outNameFus, sep = "/"), append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
