@@ -139,5 +139,5 @@ sum(fusions$TPM, as.numeric(diploidAug$TPM))/1e6
 
 diploidAug$TPM = formatC(x = diploidAug$TPM,digits = 4)
 
-write.table(diploid, file = paste(args$wd, outName, sep = "/"), append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
+write.table(diploidAug, file = paste(args$wd, outName, sep = "/"), append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
 write.table(fusions, file = paste(args$wd, outNameFus, sep = "/"), append = FALSE, quote = FALSE, sep = '\t', row.names = FALSE, col.names = TRUE, )
