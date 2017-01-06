@@ -19,11 +19,11 @@ def generateReads(modelID, isoV, simName, fusRef, fusV, simReads, otherReads, me
 
 
 	model = syn.get(modelID, downloadLocation = os.getcwd())
-	cmd = ' '.join(['rsem-simulate-reads /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/diploid_reference_genome/STAR/GRCh37v75_diploid', model.filePath, isoV, '0.066', str(otherReads), simName+'_diploid'])
+	cmd = ' '.join(['rsem-simulate-reads /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/diploid_reference_genome/STAR/GRCh37v75_diploid', model.path, isoV, '0.066', str(otherReads), simName+'_diploid'])
 	print cmd
 	subprocess.call(cmd, shell = True)
 
-	cmd = ' '.join(['rsem-simulate-reads', fusRef, model.filePath, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
+	cmd = ' '.join(['rsem-simulate-reads', fusRef, model.path, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
 	print cmd
 	subprocess.call(cmd, shell = True)
 
@@ -173,7 +173,7 @@ if __name__=="__main__":
 	module('load','rsem/1.2.8')
 	module('load','star/2.4.2a')
 
-
+	syn = synapseclient.login()
 
 	## Wrap jobs
 	generateReads(modelID=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=args.numSimReads, otherReads=args.totalReads-args.numSimReads)
