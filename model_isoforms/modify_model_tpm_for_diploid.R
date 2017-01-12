@@ -4,21 +4,21 @@
 # Mar 9, 2016
 
 library(argparse)
-
+require(data.table)
 
 parser = ArgumentParser(description='Generate diploid TPM files for read simulation.')
 parser$add_argument('--TPM', dest="inpath", type="character", required=TRUE, help='Isoform TPM file from RSEM.')
 parser$add_argument('--gtf', type="character", required=TRUE, help='Gene models from which to simulate reads.')
 parser$add_argument('--targetDepth', default = 20, type="integer", help='Total million reads to simulate [default %(default)s].')
 parser$add_argument('--wd', default = getwd(), type="character", help='Directory for output files [default %(default)s].')
-parser$add_argument('--codeDir', default = getwd(), type="character", help='Directory where R code functions file is located [default %(default)s].')
+#parser$add_argument('--codeDir', default = getwd(), type="character", help='Directory where R code functions file is located [default %(default)s].')
 
 
 
 args = parser$parse_args()
-source(paste(args$codeDir, 'isoExpFunctions.R', sep = "/"))
+source(Sys.which("isoExpFunctions.R"))
 inpath = args$inpath
-gtf = read.delim(args$gtf,header = FALSE)
+gtf = read.delim(args$gtf,header = FALSE, comment.char="#")
 targetDepth = args$targetDepth
 setwd(args$wd)
 
@@ -40,8 +40,37 @@ hist(log(model$length), col = "honeydew1", main = "all transcripts - length")
 
 print(paste("Fraction not observed", length(which(model$TPM == 0))/ nrow(model)))
 print(paste("Fraction not observed", length(which(model$expected_count == 0))/ nrow(model)))
+ 
+# Convert to data.table and remove factors
+dtModel <- data.table(model)
+dtModel[, gene_id := as.character(gene_id)]
+dtModel[, transcript_id := as.character(transcript_id)]
 
+# Calculate total number of transcripts per gene and total tpm per gene
+dtModel[, total_tx := .N, by = gene_id]
+dtModel[, total_tpm := sum(TPM), by = gene_id] 
 
+# Index the transcripts per gene
+dtModel[, index_tx := as.numeric(ave(gene_id, gene_id, FUN=function(x){ sample(length(x)) } )) ]
+
+# Randomly select the number of transcripts to be expressed per gene
+#dtModel[, sampled_tx := ceiling(total_tx * runif(1)), by= gene_id]
+dtModel[, sampled_tx := rnbinom(1,size=1,prob=.5) + 1, by= gene_id]
+dtModel[, sampled_tx := pmin(total_tx,sampled_tx)]
+
+# Randomly select which transcripts will be expressed
+dtModel[, tx_exp := runif(1)*(index_tx <= sampled_tx), by = transcript_id]
+
+# Distribute the total gene TPM across the expressed transcripts
+dtModel[, new_tpm := tx_exp / sum(tx_exp) * total_tpm, by = gene_id]
+
+# Convert back to data.frame
+dtModel <- dtModel[,c("transcript_id","gene_id","length", "effective_length", "expected_count", "new_tpm","FPKM","IsoPct")]
+colnames(dtModel) = colnames(model)
+model = as.data.frame(dtModel)
+
+# Look at data
+hist(log(model$TPM), col = "honeydew1", main = "TPM")
 
 # Modify TPM values to introduce noise to original model.
 altModel = addNoise(model)
