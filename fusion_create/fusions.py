@@ -8,7 +8,8 @@ MAX_TOSS_NUM = 100
 
 def getTranscript(db, gene):
     trans = []
-    for item in db.children(gene,featuretype = "transcript"):
+    result =  db.children(gene,featuretype = "transcript")
+    for item in result:
         if item.source == 'protein_coding':
             trans.append(item)
     if (len(trans) == 0):
@@ -21,13 +22,14 @@ def getTranscript(db, gene):
 def getJunctionAtExonBoundary(db, tranId, strand, isDonor):
 # TODO: figure out why this is sometimes returning empty lists    
     exons = []
-    for item in db.children(tranId, featuretype='exon', order_by='start'):
+    result =  db.children(tranId, featuretype='exon', order_by='start')
+    for item in result:
         exons.append(item)
     if len(exons)-2 < 0:
         return False,999,999
     if (strand == '+' and isDonor) or (strand == '-' and (not isDonor)):    #Kristen: please check all the genes has '+' or '-' not '.'
         eId = random.randint(0,len(exons)-2)
-        fusExons = exons[0:eId]
+        fusExons = exons[0:(eId+1)] 
         return True,exons[eId].end,fusExons
     elif (strand == '-' and isDonor) or (strand == '+' and (not isDonor)):
         eId = random.randint(1,len(exons)-1)
