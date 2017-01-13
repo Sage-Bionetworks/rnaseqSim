@@ -5,8 +5,6 @@ import argparse
 import os
 import random
 import shutil
-import synapseclient
-
     
 
 
@@ -14,16 +12,15 @@ import synapseclient
 ## Workflow functions
 ########################
 
-def generateReads(modelID, isoV, simName, fusRef, fusV, simReads, dipGenome, otherReads, memory="2G", cores=1, disk="15G"):
+def generateReads(model, isoV, simName, fusRef, fusV, simReads, dipGenome, otherReads, memory="2G", cores=1, disk="15G"):
 	'''Runs Fusim to generate fusion events.'''
 
 
-	model = syn.get(modelID, downloadLocation = os.getcwd())
-	cmd = ' '.join(['rsem-simulate-reads', dipGenome, model.path, isoV, '0.066', str(otherReads), simName+'_diploid'])
+	cmd = ' '.join(['rsem-simulate-reads', dipGenome, model, isoV, '0.066', str(otherReads), simName+'_diploid'])
 	print cmd
 	subprocess.call(cmd, shell = True)
 
-	cmd = ' '.join(['rsem-simulate-reads', fusRef, model.path, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
+	cmd = ' '.join(['rsem-simulate-reads', fusRef, model, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
 	print cmd
 	subprocess.call(cmd, shell = True)
 
@@ -169,11 +166,9 @@ if __name__=="__main__":
 	parser.add_argument("--fusRef", help="Path to fusion RSEM-format reference.", required=True)
         parser.add _argument("--dipGenome", help="File of the diploid genome.", required=True)
 	args = parser.parse_args()
-	
-	syn = synapseclient.login()
-
+		
 	## Wrap jobs
-	generateReads(modelID=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=args.numSimReads, dipGenome=args.dipGenome, otherReads=args.totalReads-args.numSimReads)
+	generateReads(model=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=args.numSimReads, dipGenome=args.dipGenome, otherReads=args.totalReads-args.numSimReads)
 	postProcessReads(simName=args.simName, totalReads=args.totalReads, simReads=args.numSimReads)
 	makeIsoformsTruth(simName=args.simName)
 	
