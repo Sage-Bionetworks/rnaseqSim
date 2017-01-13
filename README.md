@@ -3,9 +3,9 @@ For SMC-RNA challenge, code for analyzing datasets of validated fusions and gene
 
 ## Requirements:
 
-STAR 2.4.2a (https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz)
+[STAR 2.4.2a] (https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz)
 
-RSEM v1.2.31 (https://github.com/deweylab/RSEM/archive/v1.2.31.tar.gz)
+[RSEM v1.2.31] (https://github.com/deweylab/RSEM/archive/v1.2.31.tar.gz)
 
 ## Steps:
 
