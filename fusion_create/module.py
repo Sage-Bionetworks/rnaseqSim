@@ -72,9 +72,6 @@ if __name__ == '__main__':
     parser.add_argument('--minLength', default=400, help='Minimum length of fusion transcript.', type=int, required=False)
     parser.add_argument("--simName", help="Prefix for the simulation filenames.", default='testSimulation', required=False)
     args = parser.parse_args()
-
-#    execfile(os.environ['MODULESHOME']+'/init/python.py')
-#    module('load','rsem/1.2.8')
     
     
     fastaFN = run_module(genome_file=args.genome, gtf_file=args.gtf,numEvents=args.numEvents, simName=args.simName)
