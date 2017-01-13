@@ -14,12 +14,12 @@ import synapseclient
 ## Workflow functions
 ########################
 
-def generateReads(modelID, isoV, simName, fusRef, fusV, simReads, otherReads, memory="2G", cores=1, disk="15G"):
+def generateReads(modelID, isoV, simName, fusRef, fusV, simReads, dipGenome, otherReads, memory="2G", cores=1, disk="15G"):
 	'''Runs Fusim to generate fusion events.'''
 
 
 	model = syn.get(modelID, downloadLocation = os.getcwd())
-	cmd = ' '.join(['rsem-simulate-reads /work/DAT_116__ICGC-TCGA_seq-breakpoints_challenge/Data/diploid_reference_genome/STAR/GRCh37v75_diploid', model.path, isoV, '0.066', str(otherReads), simName+'_diploid'])
+	cmd = ' '.join(['rsem-simulate-reads', dipGenome, model.path, isoV, '0.066', str(otherReads), simName+'_diploid'])
 	print cmd
 	subprocess.call(cmd, shell = True)
 
@@ -167,16 +167,13 @@ if __name__=="__main__":
 	parser.add_argument("--isoformTPM", help="File of isoform TPM values to simulate.", required=True)
 	parser.add_argument("--fusionTPM", help="File of fusion TPM values to simulate.", required=True)
 	parser.add_argument("--fusRef", help="Path to fusion RSEM-format reference.", required=True)
+        parser.add _argument("--dipGenome", help="File of the diploid genome.", required=True)
 	args = parser.parse_args()
-
-	execfile(os.environ['MODULESHOME']+'/init/python.py')
-	module('load','rsem/1.2.8')
-	module('load','star/2.4.2a')
-
+	
 	syn = synapseclient.login()
 
 	## Wrap jobs
-	generateReads(modelID=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=args.numSimReads, otherReads=args.totalReads-args.numSimReads)
+	generateReads(modelID=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=args.numSimReads, dipGenome=args.dipGenome, otherReads=args.totalReads-args.numSimReads)
 	postProcessReads(simName=args.simName, totalReads=args.totalReads, simReads=args.numSimReads)
 	makeIsoformsTruth(simName=args.simName)
 	
