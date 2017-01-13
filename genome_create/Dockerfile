@@ -9,6 +9,6 @@ RUN pip install argparse
 
 WORKDIR /opt
 
-COPY *.py  /opt 
+COPY *.py  /opt/ 
 RUN chmod +x /opt/*
 ENV PATH /opt:$PATH

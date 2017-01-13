@@ -8,7 +8,7 @@ WORKDIR /opt
 RUN pip install pip --upgrade
 RUN pip install numpy argparse gffutils biopython
 
-COPY *.py* /opt
+COPY *.py* /opt/
 RUN chmod +x *.py*
 ENV PATH /opt:$PATH
  

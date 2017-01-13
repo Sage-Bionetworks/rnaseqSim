@@ -7,7 +7,7 @@ RUN pip install argparse synapseclient
 
 WORKDIR /opt
 
-COPY generate_reads_noToil.py /opt
+COPY generate_reads_noToil.py /opt/
 RUN chmod +x /opt/generate_reads_noToil.py
 ENV PATH /opt:$PATH
 
