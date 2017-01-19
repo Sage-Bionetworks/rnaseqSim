@@ -20,7 +20,7 @@ args = parser$parse_args()
 # Functions to modify model parameters
 #####################
 
-# Generates a new distribution with a gamma shape. Minimum cannot be less than read length.
+# Generates a new insert size distribution with a gamma shape. Minimum cannot be less than read length.
 makeNewInsertSizeDist=function(targetInsertSize,upper=510,lower=100){
   newdist = rgamma(n = 1000,shape = 5,scale = 0.5)
 #  hist(newdist, breaks = 40)
@@ -41,7 +41,8 @@ makeNewInsertSizeDist=function(targetInsertSize,upper=510,lower=100){
 
 params = yaml.load_file(args$param)
 #params = yaml.load_file('~/Computing/SMC_RNA/rnaseqSim/fastq_create/params.yml')
-model = read.delim(getFileLocation(synGet(args$synid)),header = FALSE,as.is = TRUE)
+modelEnt = synGet(args$synid)
+model = read.delim(getFileLocation(modelEnt),header = FALSE,as.is = TRUE)
 newModel = data.frame()
 
 #model_type # 0, single-end, no quality score; 1, single-end, quality score; 2, paired-end, no quality score; 3, paired-end, quality score
@@ -51,7 +52,7 @@ newModel[1,1] = '3'
 if(params$stranded == TRUE) newModel[2,1] = '1' else  newModel[2,1] = '0.5' 
 
 # Set insert size distribution
-res = makeNewInsertSizeDist(params$insertSize)
+res = makeNewInsertSizeDist(params$insertSize,lower = params$readLength)
 newModel[3,1] = res$spread
 newModel[4,1] = res$probs
 
@@ -76,3 +77,8 @@ if(params$coverageBias == 'uniform'){
 }
 
 tempFile = write.table(finalModel,file = args$out,append = FALSE,quote = FALSE,row.names = FALSE,col.names = FALSE)
+annotations = list(coverage_bias=params$coverageBias,insert_size=params$insertSize,original_sample=modelEnt@fileHandle$fileName)
+finalModelEnt = File(path = args$out, synapseStore = TRUE, parentId="syn7506232")
+synSetAnnotations(finalModelEnt) = annotations
+finalModelEnt = synStore(finalModelEnt)
+
