@@ -35,8 +35,8 @@ steps:
     in:
       gtf: GTF
       genome: GENOME
-      numEvents:EVENTS
-      simName: NAME
+      numEvents: NUM_EVENTS
+      simName: SIM_NAME
 
     out: [fusGTF, fusRef]
 
@@ -47,17 +47,25 @@ steps:
       gtf: fusion/fusGTF
       depth: TARGET_DEPTH
 
-    out: [isoformTPM, fusionTPM]
+    out: [isoformTPM, fusionTPM, log]
+
+  sed:
+    run ../general_tools/sed.cwl
+    in:
+      input: isoform/log
+      n: { default: "'s/.*Number of fusion reads to simulate: \(.*\)"/\1/p'" }
+
+    out: [numSimReads]
 
   reads:
     run: ../fastq_create/cwl/create_fastq.cwl
     in:
-      totalReads:
-      numSimReads:
-      simName: NAME
-      RSEMmodel: MODEL
+      totalReads: TARGET_DEPTH
+      numSimReads: sed/numSimReads
+      simName: SIM_NAME
+      RSEMmodel: RSEM_MODEL
       isoformTPM: isoform/isoformTPM
       fusionTPM: isoform/fusionTPM
-      #fusRef: fusion/fusRef
+      fusRef: fusion/fusRef
 
     out: [output]
