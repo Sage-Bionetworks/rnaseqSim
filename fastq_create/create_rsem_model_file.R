@@ -10,37 +10,41 @@ library(yaml)
 parser = ArgumentParser(description='Model file for RSEM FASTQ simulation based on input parameters.')
 parser$add_argument('--param', dest="param", type="character", required=TRUE, help='Input parameter file (YAML-format).')
 parser$add_argument('--inModel', dest="synid", type="character", required=TRUE, help='Synapse ID of input model.')
-parser$add_argument('--outFileName', dest="out", type="character", required=TRUE, help='Name of output model file.')
+parser$add_argument('--out', dest="out", type="character", required = TRUE, help='Name of output model file OR Synapse ID of model file to replace.')
 
 
 args = parser$parse_args()
-
 
 #####################
 # Functions to modify model parameters
 #####################
 
-# Generates a new insert size distribution with a gamma shape. Minimum cannot be less than read length.
+# Generates a new distribution with a gamma shape. Minimum cannot be less than read length.
 makeNewInsertSizeDist=function(targetInsertSize,upper=510,lower=100){
-  newdist = rgamma(n = 1000,shape = 5,scale = 0.5)
-#  hist(newdist, breaks = 40)
+  newdist = rgamma(n = 5000,shape = 5,scale = 0.5)
   md = median(newdist)
   
-  multFactor = (targetInsertSize+30)/md
-  distMin = lower
-  distMax = upper
-  distSpread = seq(distMin,distMax)
+  multFactor = (targetInsertSize+30)/md 
+  distSpread = seq(lower,upper)
   probs = dgamma(x=distSpread/multFactor,shape = 5,scale = 0.5)
   probsScaled = probs/sum(probs)
   plot(x=distSpread,y=probsScaled)
   total = sum(probsScaled)
   
-  output = list(spread=paste(distMin,distMax,length(distSpread),sep = " "), probs=paste(probs, collapse = " "))
+  output = list(spread=paste(lower,upper,length(distSpread),sep = " "), probs=paste(probsScaled, collapse = " "))
+  return(output)
+}
+
+
+# Generates a distribution for 3' coverage bias
+makeBiasedDist=function(numBins=20){
+  newdist = hist(rbeta(1000, 1.7,1.1),breaks = (numBins-1))
+  probs = newdist$density/numBins
+  output = paste(probs, collapse = " ")
   return(output)
 }
 
 params = yaml.load_file(args$param)
-#params = yaml.load_file('~/Computing/SMC_RNA/rnaseqSim/fastq_create/params.yml')
 modelEnt = synGet(args$synid)
 model = read.delim(getFileLocation(modelEnt),header = FALSE,as.is = TRUE)
 newModel = data.frame()
@@ -70,15 +74,23 @@ if(params$coverageBias == 'uniform'){
 } else {
   newModel[7,1] = '1'
   newModel[8,1] = '20'
-  newModel[9,1] = 'insert some probs here'
+  newModel[9,1] = makeBiasedDist()
   temp = data.frame("V1"=model[10:nrow(model),1])
   finalModel = rbind(newModel,temp)
   
 }
 
-tempFile = write.table(finalModel,file = args$out,append = FALSE,quote = FALSE,row.names = FALSE,col.names = FALSE)
 annotations = list(coverage_bias=params$coverageBias,insert_size=params$insertSize,original_sample=modelEnt@fileHandle$fileName)
-finalModelEnt = File(path = args$out, synapseStore = TRUE, parentId="syn7506232")
-synSetAnnotations(finalModelEnt) = annotations
-finalModelEnt = synStore(finalModelEnt)
+
+if (substr(args$out,start = 1,stop = 3) == "syn") {
+  finalModelEnt = synGet(args$out)
+  write.table(finalModel,file = finalModelEnt@filePath, append = FALSE,quote = FALSE,row.names = FALSE,col.names = FALSE)
+  synSetAnnotations(finalModelEnt) = annotations
+  finalModelEnt = synStore(finalModelEnt)
+} else {
+  write.table(finalModel,file = args$out,append = FALSE,quote = FALSE,row.names = FALSE,col.names = FALSE)
+  finalModelEnt = File(path = args$out, synapseStore = TRUE, parentId="syn7506232")
+  synSetAnnotations(finalModelEnt) = annotations
+  finalModelEnt = synStore(finalModelEnt)
+}
 
