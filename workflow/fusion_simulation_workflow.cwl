@@ -14,6 +14,7 @@ inputs:
   GENOME: File
   EXPRESSION_PROFILE: File
   RSEM_MODEL: File
+  DIP_GENOME: File
 
 outputs:
   OUTPUT:
@@ -67,5 +68,6 @@ steps:
       isoformTPM: isoform/isoformTPM
       fusionTPM: isoform/fusionTPM
       fusRef: fusion/fusRef
+      dipGenome: DIP_GENOME
 
     out: [output]

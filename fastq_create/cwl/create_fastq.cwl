@@ -62,6 +62,12 @@ inputs:
       prefix: --fusRef
       valueFrom: $(inputs.fusRef.nameroot)
 
+  dipGenome:
+    type: File
+    inputBinding:
+      position: 1
+      prefix: --dipGenome
+
 outputs:
 
   output:
