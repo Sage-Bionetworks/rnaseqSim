@@ -1,6 +1,4 @@
 #!/usr/bin/env cwl-runner
-#
-# Authors: Allison Creason, Kristen Dang, Kyle Ellrott, Ryan Spangler
 
 cwlVersion: v1.0
 class: CommandLineTool
@@ -43,9 +41,9 @@ outputs:
   isoformTPM:
     type: File
     outputBinding:
-      glob: $("*results_modDiploid_" + $depth)
+      glob: $("*results_modDiploid_" + inputs.depth)
 
   fusionTPM:
     type: File
     outputBinding:
-      glob: $("*results_modDiploidFusionOnly_" + $depth)
+      glob: $("*results_modDiploidFusionOnly_" + inputs.depth)

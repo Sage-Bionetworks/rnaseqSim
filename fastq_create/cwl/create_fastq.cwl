@@ -1,6 +1,4 @@
 #!/usr/bin/env cwl-runner
-#
-# Authors: Allison Creason, Kristen Dang, Kyle Ellrott, Ryan Spangler
 
 cwlVersion: v1.0
 class: CommandLineTool
@@ -19,12 +17,6 @@ requirements:
     ramMin: 
 
 inputs:
-
-  totalReads:
-    type: int?
-    inputBinding:
-      position: 1
-      prefix: --totalReads
 
   numSimReads:
     type: int?
@@ -56,11 +48,22 @@ inputs:
       position: 1
       prefix: --fusionTPM
 
+  totalReads:
+    type: int
+    inputBinding:
+      position: 1
+      prefix: --totalReads
+      valueFrom: $(inputs.totalReads * 1000000)
+
+  fusRef:
+    type: File
+    inputBinding:
+      position: 1
+      prefix: --fusRef
+      valueFrom: $(inputs.fusRef.nameroot)
+
 outputs:
 
   output:
     type: File
 
-arguments:
-  - valueFrom: $(inputs.simName + "_" + inputs.numEvents +  "_ev")
-    prefix: "--fusRef"
