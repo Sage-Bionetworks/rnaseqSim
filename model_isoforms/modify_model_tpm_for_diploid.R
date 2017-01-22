@@ -62,7 +62,7 @@ dtModel[, sampled_tx := pmin(total_tx,sampled_tx)]
 dtModel[, tx_exp := runif(1)*(index_tx <= sampled_tx), by = transcript_id]
 
 # Distribute the total gene TPM across the expressed transcripts
-dtModel[, new_tpm := tx_exp / sum(tx_exp) * total_tpm, by = gene_id]
+dtModel[, new_tpm := round(tx_exp / sum(tx_exp) * total_tpm,2), by = gene_id]
 
 # Convert back to data.frame
 dtModel <- dtModel[,c("transcript_id","gene_id","length", "effective_length", "expected_count", "new_tpm","FPKM","IsoPct")]

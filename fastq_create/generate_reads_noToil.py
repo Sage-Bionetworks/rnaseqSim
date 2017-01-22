@@ -164,7 +164,7 @@ if __name__=="__main__":
 	parser.add_argument("--isoformTPM", help="File of isoform TPM values to simulate.", required=True)
 	parser.add_argument("--fusionTPM", help="File of fusion TPM values to simulate.", required=True)
 	parser.add_argument("--fusRef", help="Path to fusion RSEM-format reference.", required=True)
-        parser.add _argument("--dipGenome", help="File of the diploid genome.", required=True)
+        parser.add_argument("--dipGenome", help="File of the diploid genome.", required=True)
 	args = parser.parse_args()
 		
 	## Wrap jobs
