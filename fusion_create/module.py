@@ -56,7 +56,7 @@ def run_module(genome_file, gtf_file, numEvents, simName):
 def makeFusionReference(fastaList, simName, numEvents):
    '''Runs RSEM to make reference for fusion events.'''
    
-   cmd = ' '.join(['rsem-prepare-reference --gtf', simName+'.gtf', '--star --num-threads 4', ','.join(fastaList), '_'.join([simName, str(numEvents), 'ev'])])
+   cmd = ' '.join(['rsem-prepare-reference --gtf', simName+'_filtered.gtf', '--star --num-threads 4', ','.join(fastaList), '_'.join([simName, str(numEvents), 'ev'])])
    print(cmd)
    subprocess.call(cmd, shell=True)
 
