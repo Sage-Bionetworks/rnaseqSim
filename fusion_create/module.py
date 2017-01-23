@@ -37,7 +37,7 @@ def run_module(genome_file, gtf_file, numEvents, simName):
     hg19 = seqobjs.readGenome(genome_file)
     fastaFilenames = list()    
 
-    with open(''.join([simName, '_filtered.gtf']),'w') as gtf, open(''.join([simName, '.bedpe']),'w') as bedpe:
+    with open(''.join([simName, '.gtf']),'w') as gtf, open(''.join([simName, '_filtered.bedpe']),'w') as bedpe:
     # Get fusion events as tuples of Bio.Seq objects
     # TODO: Simplify return objects, possibly returning one event at a time instead of list
        for event in fusions.getRandomFusions(db=db, names=protein_coding_genes, num=numEvents):
@@ -56,7 +56,7 @@ def run_module(genome_file, gtf_file, numEvents, simName):
 def makeFusionReference(fastaList, simName, numEvents):
    '''Runs RSEM to make reference for fusion events.'''
    
-   cmd = ' '.join(['rsem-prepare-reference --gtf', simName+'_filtered.gtf', '--star --num-threads 4', ','.join(fastaList), '_'.join([simName, str(numEvents), 'ev'])])
+   cmd = ' '.join(['rsem-prepare-reference --gtf', simName+'.gtf', '--star --num-threads 4', ','.join(fastaList), '_'.join([simName, str(numEvents), 'ev'])])
    print(cmd)
    subprocess.call(cmd, shell=True)
 
