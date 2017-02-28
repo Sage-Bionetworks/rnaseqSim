@@ -23,15 +23,19 @@ Expression profile -
 ## Basic Steps:
 
 Step 1 - Index Diploid Genome:
+
 `rsem-prepare-reference --gtf [diploid.ref.gtf] --star [diploid.ref.fa] [Index name]`
 
 Step 2 - Create fusion events, truth file, and RSEM-format fusion reference:
+
 `fusion_create/module.py --gtf Hsapiens_Ensembl_v75_refonly.gtf --numEvents [XX] --simName [simName]`
 
 Step 3 - Adjust estimated isoform values to include expression for fusion genes according to a model:
+
 `model_isoforms/modify_model_tpm_for_diploid.R --TPM [input expression profile] --gtf [simName.gtf] --targetDepth [XX] --codeDir [/path/to/code] &> [output.log]`
 
 Step 4 - Generate reads from diploid and fusion references:
+
 `fastq_create/generate_reads.py --totalReads [targetDepth * 1000000] --numSimReads [output.log] --simName [simName] --RSEMmodel [model file] --isoformTPM [model_isoforms output] --fusionTPM [model_isoforms output] --fusRef [fusion_create output]`
 
 
