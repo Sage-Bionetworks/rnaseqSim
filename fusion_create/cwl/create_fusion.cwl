@@ -55,3 +55,11 @@ outputs:
     type: File
     outputBinding:
       glob: $(inputs.simName + "_" + inputs.numEvents +  "_ev.seq")
+   secondaryFiles:
+     - ^.chrlist
+     - ^.grp
+     - ^.idx.fa
+     - ^Log.out
+     - ^.n2g.idx.fa
+     - ^.ti
+     - ^.transcripts.fa

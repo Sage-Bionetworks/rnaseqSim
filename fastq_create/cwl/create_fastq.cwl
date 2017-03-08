@@ -2,7 +2,7 @@
 
 cwlVersion: v1.0
 class: CommandLineTool
-baseCommand: [generate_reads_noToil.py]
+baseCommand: [generate_reads.py]
 
 doc: "Generate FastQ reads files"
 
@@ -17,12 +17,6 @@ requirements:
     ramMin: 
 
 inputs:
-
-  numSimReads:
-    type: int?
-    inputBinding:
-      position: 1
-      prefix: --numSimReads
   
   simName:
     type: string
@@ -60,7 +54,7 @@ inputs:
     inputBinding:
       position: 1
       prefix: --fusRef
-      valueFrom: $(inputs.fusRef.nameroot)
+      valueFrom: $(inputs.fusRef + "/" + inputs.fusRef.nameroot)
 
   dipGenome:
     type: File
@@ -68,8 +62,30 @@ inputs:
       position: 1
       prefix: --dipGenome
 
+  isoformLog:
+    type: File
+    inputBinding:
+      position: 1
+      prefix: --isoformLog
+
 outputs:
 
-  output:
+  fastq1:
     type: File
+    outputBinding:
+      glob: $(simName + "_mergeSort_1.fq.gz")
 
+  fastq2:
+    type: File
+    outputBinding:
+      glob: $(simName + "_mergeSort_2.fq.gz")
+
+  isoformTruth:
+    type: File
+    outputBinding:
+      glob: $(simName + "_isoforms_truth.txt")
+
+  fusionTruth:
+    type: File
+    outputBinding:
+      glob: $(simName + "_filtered.bedpe")

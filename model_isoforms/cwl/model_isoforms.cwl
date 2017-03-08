@@ -16,6 +16,8 @@ requirements:
     coresMin: 
     ramMin: 
 
+stdout: isoform.log
+
 inputs:
 
   tpm:
@@ -47,3 +49,6 @@ outputs:
     type: File
     outputBinding:
       glob: $("*results_modDiploidFusionOnly_" + inputs.depth)
+
+  isoformLog:
+    type: stdout

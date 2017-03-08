@@ -19,7 +19,7 @@ inputs:
 outputs:
   OUTPUT:
     type: File
-    outputSource: reads/output
+    outputSource: [reads/fusionTruth, reads/isoformTruth, reads/fastq1, reads/fastq2]
 
 steps:
 
@@ -50,24 +50,16 @@ steps:
 
     out: [isoformTPM, fusionTPM, log]
 
-  sed:
-    run ../general_tools/sed.cwl
-    in:
-      input: isoform/log
-      n: { default: "'s/.*Number of fusion reads to simulate: \(.*\)"/\1/p'" }
-
-    out: [numSimReads]
-
   reads:
     run: ../fastq_create/cwl/create_fastq.cwl
     in:
       totalReads: TARGET_DEPTH
-      numSimReads: sed/numSimReads
       simName: SIM_NAME
       RSEMmodel: RSEM_MODEL
       isoformTPM: isoform/isoformTPM
       fusionTPM: isoform/fusionTPM
       fusRef: fusion/fusRef
       dipGenome: DIP_GENOME
+      isoformLog: isoform/log
 
-    out: [output]
+    out: [fusionTruth, isoformTruth, fastq1, fastq2]
