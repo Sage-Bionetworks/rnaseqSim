@@ -156,9 +156,7 @@ def parseIsoformLog(isoformLog):
 		for line in logFH:
 			m = re.search(".*fusion.*: ([0-9]+).*",line)
 			if m:
-				numSimReads = m.group(1)
-				print line
-				print numSimReads
+				numSimReads = int(m.group(1))
 				return numSimReads
 
 if __name__=="__main__":
