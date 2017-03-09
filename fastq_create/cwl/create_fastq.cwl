@@ -54,13 +54,14 @@ inputs:
     inputBinding:
       position: 1
       prefix: --fusRef
-      valueFrom: $(inputs.fusRef + "/" + inputs.fusRef.nameroot)
+      valueFrom: $(inputs.fusRef.dirname + "/" + inputs.fusRef.nameroot)
 
   dipGenome:
-    type: File
+    type: Directory
     inputBinding:
       position: 1
       prefix: --dipGenome
+      valueFrom: $(inputs.dipGenome.path + "/GRCh37v75_STAR")
 
   isoformLog:
     type: File
@@ -73,19 +74,15 @@ outputs:
   fastq1:
     type: File
     outputBinding:
-      glob: $(simName + "_mergeSort_1.fq.gz")
+      glob: $(inputs.simName + "_mergeSort_1.fq.gz") 
 
   fastq2:
     type: File
     outputBinding:
-      glob: $(simName + "_mergeSort_2.fq.gz")
+      glob: $(inputs.simName + "_mergeSort_2.fq.gz") 
 
   isoformTruth:
     type: File
     outputBinding:
-      glob: $(simName + "_isoforms_truth.txt")
+      glob: $(inputs.simName + "_isoforms_truth.txt") 
 
-  fusionTruth:
-    type: File
-    outputBinding:
-      glob: $(simName + "_filtered.bedpe")

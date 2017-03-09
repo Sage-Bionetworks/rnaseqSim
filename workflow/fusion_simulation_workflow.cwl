@@ -6,6 +6,9 @@ class: Workflow
 
 doc: "Fusion Simulation Workflow"
 
+requirements:
+  - class: MultipleInputFeatureRequirement
+
 inputs:
   SIM_NAME: string
   GTF: File
@@ -14,13 +17,13 @@ inputs:
   GENOME: File
   EXPRESSION_PROFILE: File
   RSEM_MODEL: File
-  DIP_GENOME: File
+  DIP_GENOME: Directory
 
 outputs:
   OUTPUT:
     type: File
-    outputSource: [reads/fusionTruth, reads/isoformTruth, reads/fastq1, reads/fastq2]
-
+    outputSource: [fusion/fusionTruth, reads/isoformTruth, reads/fastq1, reads/fastq2]   
+ 
 steps:
 
   genome:
@@ -39,7 +42,7 @@ steps:
       numEvents: NUM_EVENTS
       simName: SIM_NAME
 
-    out: [fusGTF, fusRef]
+    out: [fusGTF, fusRef, fusionTruth]
 
   isoform:
     run: ../model_isoforms/cwl/model_isoforms.cwl
@@ -48,7 +51,7 @@ steps:
       gtf: fusion/fusGTF
       depth: TARGET_DEPTH
 
-    out: [isoformTPM, fusionTPM, log]
+    out: [isoformTPM, fusionTPM, isoformLog]
 
   reads:
     run: ../fastq_create/cwl/create_fastq.cwl
@@ -60,6 +63,6 @@ steps:
       fusionTPM: isoform/fusionTPM
       fusRef: fusion/fusRef
       dipGenome: DIP_GENOME
-      isoformLog: isoform/log
+      isoformLog: isoform/isoformLog
 
-    out: [fusionTruth, isoformTruth, fastq1, fastq2]
+    out: [isoformTruth, fastq1, fastq2] 

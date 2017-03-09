@@ -23,4 +23,4 @@ RUN git clone https://github.com/alliecreason/rnaseqSim.git  && \
     git checkout origin/workflow && \
     chmod +x model_isoforms/*.R
 
-ENV PATH /optrnaseqSim/modify_isoforms:$PATH
+ENV PATH /opt/rnaseqSim/model_isoforms:$PATH

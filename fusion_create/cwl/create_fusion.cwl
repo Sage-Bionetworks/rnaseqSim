@@ -44,18 +44,21 @@ inputs:
 
 outputs:
 
-  fusGTF:
-    type: 
-      type: Array
-      items: File
+  fusionTruth:
+    type: File
     outputBinding:
-      glob: $(inputs.simName + "_filtered.gtf")
+      glob: $(inputs.simName + "_filtered.bedpe")
+
+  fusGTF:
+    type: File
+    outputBinding:
+      glob: $(inputs.simName + ".gtf")
 
   fusRef:
     type: File
     outputBinding:
       glob: $(inputs.simName + "_" + inputs.numEvents +  "_ev.seq")
-   secondaryFiles:
+    secondaryFiles:
      - ^.chrlist
      - ^.grp
      - ^.idx.fa
