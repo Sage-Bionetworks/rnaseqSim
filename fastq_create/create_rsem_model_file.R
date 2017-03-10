@@ -41,7 +41,7 @@ makeBiasedDist=function(bias="high",numBins=20){
   if (bias=="high") {
   newdist = hist(rbeta(1000, 1.7,1.1),breaks = (numBins-1))
   } else if (bias=="moderate"){
-  newdist = hist(rbeta(1000, 1.7,1.1),breaks = (numBins-1))
+  newdist = hist(rbeta(1000, 1.3,1.1),breaks = (numBins-1))
   }
   probs = newdist$density/numBins
   output = paste(probs, collapse = " ")
