@@ -61,7 +61,7 @@ inputs:
     inputBinding:
       position: 1
       prefix: --dipGenome
-      valueFrom: $(inputs.dipGenome.path + "/GRCh37v75_STAR")
+      valueFrom: $(inputs.dipGenome.path +"/" + inputs.dipGenome.basename + "/GRCh37v75_STAR")
 
   isoformLog:
     type: File
