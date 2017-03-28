@@ -26,11 +26,17 @@ outputs:
  
 steps:
 
-  genome:
-    run: ../genome_create/cwl/create_genome.cwl
+  tar:
+    run: ../general_tools/tar.cwl
     in:
-      gtf: GTF
-      suffix: SIM_NAME
+      input: DIP_GENOME
+
+    out: [output]
+
+  gunzip:
+    run: ../general_tools/gunzip.cwl
+    in:
+      input: GENOME
 
     out: [output]
 
@@ -38,7 +44,7 @@ steps:
     run: ../fusion_create/cwl/create_fusion.cwl
     in:
       gtf: GTF
-      genome: GENOME
+      genome: gunzip/output
       numEvents: NUM_EVENTS
       simName: SIM_NAME
 
@@ -62,7 +68,7 @@ steps:
       isoformTPM: isoform/isoformTPM
       fusionTPM: isoform/fusionTPM
       fusRef: fusion/fusRef
-      dipGenome: DIP_GENOME
+      dipGenome: tar/output
       isoformLog: isoform/isoformLog
 
     out: [isoformTruth, fastq1, fastq2] 
