@@ -24,7 +24,7 @@ if [ ! -d "$OUTPUT_PATH" ]; then
        mkdir $OUTPUT_PATH
 fi
 
-$CWL_PATH="$RNASEQSIM_PATH/workflow/fusion_simulation_workflow.cwl"
+CWL_PATH="$RNASEQSIM_PATH/workflow/fusion_simulation_workflow.cwl"
 cd $OUTPUT_PATH
 cwltool $CWL_PATH $INPUT_JOB
 gsutil cp $OUTPUT_PATH/* $OUTPUT_BUCKET

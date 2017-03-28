@@ -26,4 +26,4 @@ gcloud compute instances create sim-fusion-$SIM_NAME \
 
 sleep 60
 
-gcloud compute --project $PROJECT ssh sim-fusion-$SIM_NAME --zone $ZONE "nohup sudo sudo -i -u ubuntu bash /home/ubuntu/rnaseq_fusion_simulation/run_workflow.sh $SIM_NAME $NUM_EVENTS $DEPTH $EXPRESION_PROFILE $RSEM_MODEL $TIMEOUT > /tmp/eval.out 2> /tmp/eval.err &"
+gcloud compute --project $PROJECT ssh sim-fusion-$SIM_NAME --zone $ZONE "nohup sudo sudo -i -u ubuntu bash /home/ubuntu/rnaseqSim/run_workflow.sh $SIM_NAME $NUM_EVENTS $DEPTH $EXPRESION_PROFILE $RSEM_MODEL $TIMEOUT > /tmp/eval.out 2> /tmp/eval.err &"
