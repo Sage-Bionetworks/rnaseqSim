@@ -17,7 +17,7 @@ inputs:
   GENOME: File
   EXPRESSION_PROFILE: File
   RSEM_MODEL: File
-  DIP_GENOME: Directory
+  DIP_GENOME: File
 
 outputs:
   OUTPUT:
