@@ -11,7 +11,7 @@ HOME="/home/ubuntu"
 INPUT_PATH="$HOME/inputs"
 OUTPUT_PATH="$HOME/outputs"
 RNASEQSIM_PATH="$HOME/rnaseqSim"
-OUTPUT_BUCKET="gs://smc-rna-tumor-staging"
+OUTPUT_BUCKET="gs://smc-rna-eval/training/"
 
 if [ ! -d "$INPUT_PATH" ]; then
        mkdir $INPUT_PATH
