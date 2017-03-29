@@ -19,8 +19,6 @@ RUN wget https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz && \
     cp /opt/STAR-STAR_2.4.2a/bin/Linux_x86_64/* /usr/local/bin
 
 RUN git clone https://github.com/alliecreason/rnaseqSim.git && \
-    cd rnaseqSim && \
-    git checkout origin/workflow && \
     chmod +x fusion_create/*.py*
 
 ENV PATH /opt/rnaseqSim/fusion_create:$PATH

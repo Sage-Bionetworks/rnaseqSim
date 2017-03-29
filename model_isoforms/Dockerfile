@@ -19,8 +19,6 @@ RUN Rscript -e "install.packages('data.table')"
 WORKDIR /opt
 
 RUN git clone https://github.com/alliecreason/rnaseqSim.git  && \
-    cd rnaseqSim && \
-    git checkout origin/workflow && \
     chmod +x model_isoforms/*.R
 
 ENV PATH /opt/rnaseqSim/model_isoforms:$PATH

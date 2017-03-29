@@ -18,8 +18,6 @@ RUN wget https://github.com/deweylab/RSEM/archive/v1.2.31.tar.gz && \
     make install
 
 RUN git clone https://github.com/alliecreason/rnaseqSim.git && \
-    cd rnaseqSim && \
-    git checkout origin/workflow && \
     chmod +x /opt/rnaseqSim/fastq_create/*.py
 
 ENV PATH /opt/rnaseqSim/fastq_create:$PATH
