@@ -11,7 +11,7 @@ RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; 
 RUN Rscript -e "install.packages('argparse')"
 RUN Rscript -e "install.packages('data.table')"
 
-RUN pip install argparse synapseclient
+RUN pip install argparse synapseclient numpy gffutils biopython
 
 
 WORKDIR /opt
