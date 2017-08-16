@@ -37,7 +37,7 @@ def run_module(genome_file, gtf_file, numEvents, simName):
     hg19 = seqobjs.readGenome(genome_file)
     fastaFilenames = list()    
 
-    with open(''.join([simName, '_filtered.gtf']),'w') as gtf, open(''.join([simName, '.bedpe']),'w') as bedpe:
+    with open(''.join([simName, '.gtf']),'w') as gtf, open(''.join([simName, '_filtered.bedpe']),'w') as bedpe:
     # Get fusion events as tuples of Bio.Seq objects
     # TODO: Simplify return objects, possibly returning one event at a time instead of list
        for event in fusions.getRandomFusions(db=db, names=protein_coding_genes, num=numEvents):
@@ -72,9 +72,6 @@ if __name__ == '__main__':
     parser.add_argument('--minLength', default=400, help='Minimum length of fusion transcript.', type=int, required=False)
     parser.add_argument("--simName", help="Prefix for the simulation filenames.", default='testSimulation', required=False)
     args = parser.parse_args()
-
-#    execfile(os.environ['MODULESHOME']+'/init/python.py')
-#    module('load','rsem/1.2.8')
     
     
     fastaFN = run_module(genome_file=args.genome, gtf_file=args.gtf,numEvents=args.numEvents, simName=args.simName)

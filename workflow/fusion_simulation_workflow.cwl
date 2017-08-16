@@ -6,6 +6,9 @@ class: Workflow
 
 doc: "Fusion Simulation Workflow"
 
+requirements:
+  - class: MultipleInputFeatureRequirement
+
 inputs:
   SIM_NAME: string
   GTF: File
@@ -14,19 +17,26 @@ inputs:
   GENOME: File
   EXPRESSION_PROFILE: File
   RSEM_MODEL: File
+  DIP_GENOME: File
 
 outputs:
   OUTPUT:
     type: File
-    outputSource: reads/output
-
+    outputSource: [fusion/fusionTruth, reads/isoformTruth, reads/fastq1, reads/fastq2]   
+ 
 steps:
 
-  genome:
-    run: ../genome_create/cwl/create_genome.cwl
+  tar:
+    run: ../general_tools/tar.cwl
     in:
-      gtf: GTF
-      suffix: SIM_NAME
+      input: DIP_GENOME
+
+    out: [output]
+
+  gunzip:
+    run: ../general_tools/gunzip.cwl
+    in:
+      input: GENOME
 
     out: [output]
 
@@ -34,11 +44,11 @@ steps:
     run: ../fusion_create/cwl/create_fusion.cwl
     in:
       gtf: GTF
-      genome: GENOME
-      numEvents:EVENTS
-      simName: NAME
+      genome: gunzip/output
+      numEvents: NUM_EVENTS
+      simName: SIM_NAME
 
-    out: [fusGTF, fusRef]
+    out: [fusGTF, fusRef, fusionTruth]
 
   isoform:
     run: ../model_isoforms/cwl/model_isoforms.cwl
@@ -47,17 +57,18 @@ steps:
       gtf: fusion/fusGTF
       depth: TARGET_DEPTH
 
-    out: [isoformTPM, fusionTPM]
+    out: [isoformTPM, fusionTPM, isoformLog]
 
   reads:
     run: ../fastq_create/cwl/create_fastq.cwl
     in:
-      totalReads:
-      numSimReads:
-      simName: NAME
-      RSEMmodel: MODEL
+      totalReads: TARGET_DEPTH
+      simName: SIM_NAME
+      RSEMmodel: RSEM_MODEL
       isoformTPM: isoform/isoformTPM
       fusionTPM: isoform/fusionTPM
-      #fusRef: fusion/fusRef
+      fusRef: fusion/fusRef
+      dipGenome: tar/output
+      isoformLog: isoform/isoformLog
 
-    out: [output]
+    out: [isoformTruth, fastq1, fastq2] 

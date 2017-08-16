@@ -1,16 +1,14 @@
 #!/usr/bin/env cwl-runner
-#
-# Authors: Allison Creason, Kristen Dang, Kyle Ellrott, Ryan Spangler
 
 cwlVersion: v1.0
 class: CommandLineTool
-baseCommand: [generate_reads_noToil.py]
+baseCommand: [generate_reads.py]
 
 doc: "Generate FastQ reads files"
 
 hints:
   DockerRequirement:
-    dockerPull: alliecreason/create_fastq
+    dockerPull: alliecreason/rnaseqsim
 
 requirements:
   - class: InlineJavascriptRequirement
@@ -19,18 +17,6 @@ requirements:
     ramMin: 
 
 inputs:
-
-  totalReads:
-    type: int?
-    inputBinding:
-      position: 1
-      prefix: --totalReads
-
-  numSimReads:
-    type: int?
-    inputBinding:
-      position: 1
-      prefix: --numSimReads
   
   simName:
     type: string
@@ -56,11 +42,46 @@ inputs:
       position: 1
       prefix: --fusionTPM
 
+  totalReads:
+    type: int
+    inputBinding:
+      position: 1
+      prefix: --totalReads
+      valueFrom: $(inputs.totalReads * 1000000)
+
+  fusRef:
+    type: File
+    inputBinding:
+      position: 1
+      prefix: --fusRef
+      valueFrom: $(inputs.fusRef.dirname + "/" + inputs.fusRef.nameroot)
+
+  dipGenome:
+    type: Directory
+    inputBinding:
+      position: 1
+      prefix: --dipGenome
+      valueFrom: $(inputs.dipGenome.path + "/GRCh37v75_STAR/GRCh37v75_STAR")
+  isoformLog:
+    type: File
+    inputBinding:
+      position: 1
+      prefix: --isoformLog
+
 outputs:
 
-  output:
+  fastq1:
     type: File
+    outputBinding:
+      glob: $(inputs.simName + "_mergeSort_1.fq.gz") 
 
-arguments:
-  - valueFrom: $(inputs.simName + "_" + inputs.numEvents +  "_ev")
-    prefix: "--fusRef"
+  fastq2:
+    type: File
+    outputBinding:
+      glob: $(inputs.simName + "_mergeSort_2.fq.gz") 
+
+  isoformTruth:
+    type: File
+    outputBinding:
+      glob: $(inputs.simName + "_isoforms_truth.txt") 
+

@@ -62,7 +62,9 @@ dtModel[, sampled_tx := pmin(total_tx,sampled_tx)]
 dtModel[, tx_exp := runif(1)*(index_tx <= sampled_tx), by = transcript_id]
 
 # Distribute the total gene TPM across the expressed transcripts
+#dtModel[, new_tpm := round(tx_exp / sum(tx_exp) * total_tpm,2), by = gene_id]
 dtModel[, new_tpm := tx_exp / sum(tx_exp) * total_tpm, by = gene_id]
+print(paste('sum increased isoform exp: ',sum(dtModel$new_tpm)))
 
 # Convert back to data.frame
 dtModel <- dtModel[,c("transcript_id","gene_id","length", "effective_length", "expected_count", "new_tpm","FPKM","IsoPct")]
@@ -75,7 +77,7 @@ hist(log(model$TPM), col = "honeydew1", main = "TPM")
 # Modify TPM values to introduce noise to original model.
 altModel = addNoise(model)
 print(paste('correlation:', cor(log(altModel$TPM), log(model$TPM), method = "spearman")))
-print(paste('sum altModel TPM:', sum(altModel$TPM)))
+print(paste('sum altModel TPM:', sum(as.integer(altModel$TPM))))
 
 
 # Get values for the fusion genes
@@ -110,7 +112,7 @@ hist(log(fusionExp$sampled), col = "honeydew")
 
 
 # Adjust fusion TPM and other TPM to sum to 1e6
-fractionalAdjustment = 1+(1-((sum(fusionExp$sampled) + sum(altModel$TPM)) / 1e6))
+fractionalAdjustment = 1e6/(sum(fusionExp$sampled) + sum(altModel$TPM))
 fusionExp$adj = fusionExp$sampled * fractionalAdjustment
 altModel$TPM = altModel$TPM * fractionalAdjustment
 sum(altModel$TPM) + sum(fusionExp$adj)

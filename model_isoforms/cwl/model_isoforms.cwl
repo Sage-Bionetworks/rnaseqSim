@@ -1,6 +1,4 @@
 #!/usr/bin/env cwl-runner
-#
-# Authors: Allison Creason, Kristen Dang, Kyle Ellrott, Ryan Spangler
 
 cwlVersion: v1.0
 class: CommandLineTool
@@ -10,13 +8,15 @@ doc: "Model Isoform Expression"
 
 hints:
   DockerRequirement:
-    dockerPull: alliecreason/model_isoforms
+    dockerPull: alliecreason/rnaseqsim
 
 requirements:
   - class: InlineJavascriptRequirement
   - class: ResourceRequirement
     coresMin: 
     ramMin: 
+
+stdout: isoform.log
 
 inputs:
 
@@ -43,9 +43,12 @@ outputs:
   isoformTPM:
     type: File
     outputBinding:
-      glob: $("*results_modDiploid_" + $depth)
+      glob: $("*results_modDiploid_" + inputs.depth)
 
   fusionTPM:
     type: File
     outputBinding:
-      glob: $("*results_modDiploidFusionOnly_" + $depth)
+      glob: $("*results_modDiploidFusionOnly_" + inputs.depth)
+
+  isoformLog:
+    type: stdout

@@ -1,6 +1,4 @@
 #!/usr/bin/env cwl-runner
-#
-# Authors: Allison Creason, Kristen Dang, Kyle Ellrott, Ryan Spangler
 
 cwlVersion: v1.0
 class: CommandLineTool
@@ -10,7 +8,7 @@ doc: "Create fusion events"
 
 hints:
   DockerRequirement:
-    dockerPull: alliecreason/create_fusion
+    dockerPull: alliecreason/rnaseqsim
 
 requirements:
   - class: InlineJavascriptRequirement
@@ -46,15 +44,25 @@ inputs:
 
 outputs:
 
-  fusGTF:
-    type: 
-      type: Array
-      items: File
+  fusionTruth:
+    type: File
     outputBinding:
-      glob: $(inputs.simName + "_filtered.gtf")
+      glob: $(inputs.simName + "_filtered.bedpe")
+
+  fusGTF:
+    type: File
+    outputBinding:
+      glob: $(inputs.simName + ".gtf")
 
   fusRef:
-    type: array
-    items: File
+    type: File
     outputBinding:
-      glob: $(inputs.simName + "_" + inputs.numEvents +  "_ev*")
+      glob: $(inputs.simName + "_" + inputs.numEvents +  "_ev.seq")
+    secondaryFiles:
+     - ^.chrlist
+     - ^.grp
+     - ^.idx.fa
+     - ^Log.out
+     - ^.n2g.idx.fa
+     - ^.ti
+     - ^.transcripts.fa

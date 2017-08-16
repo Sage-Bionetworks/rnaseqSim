@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 SIM_NAME=$1
 NUM_EVENTS=$2
 DEPTH=$3
@@ -8,13 +7,29 @@ EXPRESION_PROFILE=$4
 RSEM_MODEL=$5
 TIMEOUT=$6
 
-CWL_PATH=rnaseq_fusion_simulation/workflow/fusion_simulation_workflow.cwl
-INPUT_JOB=$SIM_NAME.json
+HOME="/home/ubuntu"
+INPUT_PATH="$HOME/inputs"
+OUTPUT_PATH="$HOME/outputs"
+RNASEQSIM_PATH="$HOME/rnaseqSim"
+OUTPUT_BUCKET="gs://smc-rna-eval/training/"
 
-
-./rnaseq_fusion_simulation/generate_job.py --syn-table SMC-RNA-Eval/syn.table $CONTEST_SIGN $CWL_PATH $TUMOR_ID > $INPUT_JOB
-cwltool $CWL_PATH $INPUT_JOB
-
-if [ "$6" != "" ]; then
-  sudo poweroff
+if [ ! -d "$INPUT_PATH" ]; then
+       mkdir $INPUT_PATH
 fi
+
+INPUT_JOB="$INPUT_PATH/input.json"
+$RNASEQSIM_PATH/generate_job.py --simName $SIM_NAME --numEvents $NUM_EVENTS --targetDepth $DEPTH --expressionProfile $EXPRESION_PROFILE --RSEMmodel $RSEM_MODEL 
+
+if [ ! -d "$OUTPUT_PATH" ]; then
+       mkdir $OUTPUT_PATH
+fi
+
+CWL_PATH="$RNASEQSIM_PATH/workflow/fusion_simulation_workflow.cwl"
+cd $OUTPUT_PATH
+cwltool $CWL_PATH $INPUT_JOB
+gsutil cp $OUTPUT_PATH/* $OUTPUT_BUCKET
+
+
+#if [ "$6" != "" ]; then
+#  sudo poweroff
+#fi
