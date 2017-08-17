@@ -13,14 +13,20 @@ import re
 ## Workflow functions
 ########################
 
-def generateReads(model, isoV, simName, fusRef, fusV, simReads, dipGenome, otherReads, memory="2G", cores=1, disk="15G"):
+def generateReads(model, isoV, simName, fusRef, fusV, simReads, dipGenome, otherReads, memory="2G", cores=1, disk="15G", seed=None):
 	'''Runs Fusim to generate fusion events.'''
 
 	cmd = ' '.join(['rsem-simulate-reads', dipGenome, model, isoV, '0.066', str(otherReads), simName+'_diploid'])
+	# if seed is specified, add seed as parameter to RSEM
+	if isinstance(seed, (int, long)):
+        cmd = ' '.join([cmd, '--seed', str(seed)]) 
 	print cmd
 	subprocess.call(cmd, shell = True)
 
 	cmd = ' '.join(['rsem-simulate-reads', fusRef, model, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
+	# if seed is specified, add seed as parameter to RSEM
+	if isinstance(seed, (int, long)):
+        cmd = ' '.join([cmd, '--seed', str(seed)]) 
 	print cmd
 	subprocess.call(cmd, shell = True)
 
@@ -171,10 +177,11 @@ if __name__=="__main__":
 	parser.add_argument("--fusRef", help="Path to fusion RSEM-format reference.", required=True)
 	parser.add_argument("--dipGenome", help="File of the diploid genome.", required=True)
 	parser.add_argument("--isoformLog", help="Log file from modify isoforms step.", required=True)
+	parser.add_argument("--seed", help="Seed number to use for RSEM read simulation.", type=int, required=False, default = None)
 	args = parser.parse_args()
 		
 	## Wrap jobs
 	numSimReads=parseIsoformLog(isoformLog=args.isoformLog)
-	generateReads(model=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=numSimReads, dipGenome=args.dipGenome, otherReads=args.totalReads-numSimReads)
+	generateReads(model=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=numSimReads, dipGenome=args.dipGenome, otherReads=args.totalReads-numSimReads, seed=args.seed)
 	postProcessReads(simName=args.simName, totalReads=args.totalReads, simReads=numSimReads)
 	makeIsoformsTruth(simName=args.simName)

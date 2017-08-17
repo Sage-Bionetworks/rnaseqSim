@@ -18,6 +18,7 @@ inputs:
   EXPRESSION_PROFILE: File
   RSEM_MODEL: File
   DIP_GENOME: File
+  SEED: ["null", int]
 
 outputs:
   OUTPUT:
@@ -47,6 +48,7 @@ steps:
       genome: gunzip/output
       numEvents: NUM_EVENTS
       simName: SIM_NAME
+      seed: SEED
 
     out: [fusGTF, fusRef, fusionTruth]
 
@@ -56,6 +58,7 @@ steps:
       tpm: EXPRESSION_PROFILE
       gtf: fusion/fusGTF
       depth: TARGET_DEPTH
+      seed: SEED
 
     out: [isoformTPM, fusionTPM, isoformLog]
 
@@ -70,5 +73,6 @@ steps:
       fusRef: fusion/fusRef
       dipGenome: tar/output
       isoformLog: isoform/isoformLog
+      seed: SEED
 
     out: [isoformTruth, fastq1, fastq2] 
