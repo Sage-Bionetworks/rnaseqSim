@@ -37,8 +37,12 @@ makeNewInsertSizeDist=function(targetInsertSize,upper=510,lower=100){
 
 
 # Generates a distribution for 3' coverage bias
-makeBiasedDist=function(numBins=20){
+makeBiasedDist=function(bias="high",numBins=20){
+  if (bias=="high") {
   newdist = hist(rbeta(1000, 1.7,1.1),breaks = (numBins-1))
+  } else if (bias=="moderate"){
+  newdist = hist(rbeta(1000, 1.3,1.1),breaks = (numBins-1))
+  }
   probs = newdist$density/numBins
   output = paste(probs, collapse = " ")
   return(output)
@@ -69,6 +73,12 @@ newModel[6,1] = '1'
 # Set read coverage bias across transcripts
 if(params$coverageBias == 'uniform'){ 
   newModel[7,1] = '0' 
+  temp = data.frame("V1"=model[10:nrow(model),1])
+  finalModel = rbind(newModel,temp)
+} else if (params$coverageBias == 'moderate') {
+  newModel[7,1] = '1'
+  newModel[8,1] = '20'
+  newModel[9,1] = makeBiasedDist(bias = params$coverageBias)
   temp = data.frame("V1"=model[10:nrow(model),1])
   finalModel = rbind(newModel,temp)
 } else {
