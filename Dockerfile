@@ -26,7 +26,7 @@ RUN wget https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz && \
     tar -zxvf STAR_2.4.2a.tar.gz && \
     cp /opt/STAR-STAR_2.4.2a/bin/Linux_x86_64/* /usr/local/bin
 
-RUN git clone https://github.com/alliecreason/rnaseqSim.git && \
+RUN git clone --branch set_seed https://github.com/andrewelambsage/rnaseqSim && \
     chmod +x /opt/rnaseqSim/fusion_create/*.py* && \
     chmod +x /opt/rnaseqSim/model_isoforms/*.R && \
     chmod +x /opt/rnaseqSim/fastq_create/*.py

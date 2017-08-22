@@ -8,7 +8,7 @@ doc: "Create fusion events"
 
 hints:
   DockerRequirement:
-    dockerPull: alliecreason/rnaseqsim
+    dockerPull: rnaseqsim
 
 requirements:
   - class: InlineJavascriptRequirement

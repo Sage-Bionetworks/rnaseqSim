@@ -8,7 +8,7 @@ doc: "Model Isoform Expression"
 
 hints:
   DockerRequirement:
-    dockerPull: alliecreason/rnaseqsim
+    dockerPull: rnaseqsim
 
 requirements:
   - class: InlineJavascriptRequirement
