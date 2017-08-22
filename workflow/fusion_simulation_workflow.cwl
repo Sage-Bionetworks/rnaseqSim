@@ -22,7 +22,9 @@ inputs:
 
 outputs:
   OUTPUT:
-    type: File
+    type:
+      type: array
+      items: File
     outputSource: [fusion/fusionTruth, reads/isoformTruth, reads/fastq1, reads/fastq2]   
  
 steps:
