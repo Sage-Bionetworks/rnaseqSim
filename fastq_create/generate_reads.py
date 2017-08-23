@@ -16,18 +16,17 @@ import re
 def generateReads(model, isoV, simName, fusRef, fusV, simReads, dipGenome, otherReads, memory="2G", cores=1, disk="15G", seed=None):
     '''Runs Fusim to generate fusion events.'''
     cmd = ' '.join(['rsem-simulate-reads', dipGenome, model, isoV, '0.066', str(otherReads), simName+'_diploid'])
-	# if seed is specified, add seed as parameter to RSEM
-	if isinstance(seed, (int, long)):
-        cmd = ' '.join([cmd, '--seed', str(seed)]) 
-	print cmd
-	subprocess.call(cmd, shell = True)
-
-	cmd = ' '.join(['rsem-simulate-reads', fusRef, model, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
-	# if seed is specified, add seed as parameter to RSEM
-	if isinstance(seed, (int, long)):
-	    cmd = ' '.join([cmd, '--seed', str(seed)]) 
-	print cmd
-	subprocess.call(cmd, shell = True)
+    # if seed is specified, add seed as parameter to RSEM
+    if isinstance(seed, (int, long)):
+        cmd = ' '.join([cmd, '--seed', str(seed)])
+    print cmd
+    subprocess.call(cmd, shell = True)
+    cmd = ' '.join(['rsem-simulate-reads', fusRef, model, fusV, '0.066', str(int(simReads)), simName+'_fusions'])
+    # if seed is specified, add seed as parameter to RSEM
+    if isinstance(seed, (int, long)):
+        cmd = ' '.join([cmd, '--seed', str(seed)])
+    print cmd
+    subprocess.call(cmd, shell = True)
 
 
 
