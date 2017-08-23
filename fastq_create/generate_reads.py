@@ -6,6 +6,7 @@ import os
 import random
 import shutil
 import re
+import time
     
 
 
@@ -165,21 +166,27 @@ def parseIsoformLog(isoformLog):
 
 if __name__=="__main__":
 
-	parser = argparse.ArgumentParser("Runs workflow to generate fusion reads files.")
-	parser.add_argument('--totalReads', default=5e6, help='Total number of reads to generate.', type=int, required=False)
-#	parser.add_argument('--numSimReads', default=5e5, help='Total number of simulated reads to generate.', type=int, required=False)
-	parser.add_argument("--simName", help="Prefix for the simulation filenames.", default='testSimulation', required=False)
-	parser.add_argument("--RSEMmodel", help="Model file from RSEM alignment.", required=True)
-	parser.add_argument("--isoformTPM", help="File of isoform TPM values to simulate.", required=True)
-	parser.add_argument("--fusionTPM", help="File of fusion TPM values to simulate.", required=True)
-	parser.add_argument("--fusRef", help="Path to fusion RSEM-format reference.", required=True)
-	parser.add_argument("--dipGenome", help="File of the diploid genome.", required=True)
-	parser.add_argument("--isoformLog", help="Log file from modify isoforms step.", required=True)
-	parser.add_argument("--seed", help="Seed number to use for RSEM read simulation.", type=int, required=False, default = None)
-	args = parser.parse_args()
-		
-	## Wrap jobs
-	numSimReads=parseIsoformLog(isoformLog=args.isoformLog)
-	generateReads(model=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=numSimReads, dipGenome=args.dipGenome, otherReads=args.totalReads-numSimReads, seed=args.seed)
-	postProcessReads(simName=args.simName, totalReads=args.totalReads, simReads=numSimReads)
-	makeIsoformsTruth(simName=args.simName)
+    parser = argparse.ArgumentParser("Runs workflow to generate fusion reads files.")
+    parser.add_argument('--totalReads', default=5e6, help='Total number of reads to generate.', type=int, required=False)
+#    parser.add_argument('--numSimReads', default=5e5, help='Total number of simulated reads to generate.', type=int, required=False)
+    parser.add_argument("--simName", help="Prefix for the simulation filenames.", default='testSimulation', required=False)
+    parser.add_argument("--RSEMmodel", help="Model file from RSEM alignment.", required=True)
+    parser.add_argument("--isoformTPM", help="File of isoform TPM values to simulate.", required=True)
+    parser.add_argument("--fusionTPM", help="File of fusion TPM values to simulate.", required=True)
+    parser.add_argument("--fusRef", help="Path to fusion RSEM-format reference.", required=True)
+    parser.add_argument("--dipGenome", help="File of the diploid genome.", required=True)
+    parser.add_argument("--isoformLog", help="Log file from modify isoforms step.", required=True)
+    parser.add_argument("--seed", help="Seed number to use for RSEM read simulation.", type=int, required=False, default = None)
+    args = parser.parse_args()
+ 
+     # set seed to seed arument, otherwise to time
+    if isinstance(args.seed, (int, long)):
+        random.seed(args.seed)
+    else:
+        random.seed(time.time)
+        
+    ## Wrap jobs
+    numSimReads=parseIsoformLog(isoformLog=args.isoformLog)
+    generateReads(model=args.RSEMmodel, isoV=args.isoformTPM, simName=args.simName, fusRef=args.fusRef, fusV=args.fusionTPM, simReads=numSimReads, dipGenome=args.dipGenome, otherReads=args.totalReads-numSimReads, seed=args.seed)
+    postProcessReads(simName=args.simName, totalReads=args.totalReads, simReads=numSimReads)
+    makeIsoformsTruth(simName=args.simName)
