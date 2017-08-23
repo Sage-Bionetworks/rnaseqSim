@@ -8,6 +8,7 @@ import gffutils
 import fusions
 import seqobjs
 import random
+import time
 from Bio import SeqIO
 
 
@@ -75,9 +76,11 @@ if __name__ == '__main__':
     parser.add_argument("--seed", help="Seed number to use for RSEM read simulation.", type=int, required=False, default = None)
     args = parser.parse_args()
     
-    # set seed if seed argument is an integer
+    # set seed to seed arument, otherwise to time
     if isinstance(args.seed, (int, long)):
         random.seed(args.seed)
+    else: 
+        random.seed(time.time)
     
     fastaFN = run_module(genome_file=args.genome, gtf_file=args.gtf,numEvents=args.numEvents, simName=args.simName)
     makeFusionReference(fastaList = fastaFN, simName = args.simName, numEvents = args.numEvents)
