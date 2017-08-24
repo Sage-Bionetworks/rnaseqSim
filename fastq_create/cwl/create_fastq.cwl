@@ -62,11 +62,18 @@ inputs:
       position: 1
       prefix: --dipGenome
       valueFrom: $(inputs.dipGenome.path + "/GRCh37v75_STAR/GRCh37v75_STAR")
+      
   isoformLog:
     type: File
     inputBinding:
       position: 1
       prefix: --isoformLog
+      
+  seed:
+    type: ["null", int]
+    inputBinding:
+      position: 1
+      prefix: --seed
 
 outputs:
 

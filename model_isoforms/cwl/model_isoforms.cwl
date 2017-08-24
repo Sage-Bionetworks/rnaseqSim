@@ -37,6 +37,12 @@ inputs:
     inputBinding:
       position: 1
       prefix: --targetDepth
+      
+  seed:
+    type: ["null", int]
+    inputBinding:
+      position: 1
+      prefix: --seed
 
 outputs:
 

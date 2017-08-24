@@ -11,6 +11,7 @@ parser$add_argument('--TPM', dest="inpath", type="character", required=TRUE, hel
 parser$add_argument('--gtf', type="character", required=TRUE, help='Gene models from which to simulate reads.')
 parser$add_argument('--targetDepth', default = 20, type="integer", help='Total million reads to simulate [default %(default)s].')
 parser$add_argument('--wd', default = getwd(), type="character", help='Directory for output files [default %(default)s].')
+parser$add_argument('--seed', default = NULL,  type="integer", help = "Seed number to use for RSEM read simulation.")
 #parser$add_argument('--codeDir', default = getwd(), type="character", help='Directory where R code functions file is located [default %(default)s].')
 
 
@@ -21,6 +22,11 @@ inpath = args$inpath
 gtf = read.delim(args$gtf,header = FALSE, comment.char="#")
 targetDepth = args$targetDepth
 setwd(args$wd)
+
+# set seed if seed argument is numeric
+if(is.numeric(args$seed)) {
+  set.seed(args$seed)
+}
 
 outName = paste(basename(inpath), 'modDiploid', targetDepth, sep = "_")
 outNameFus = paste(basename(inpath), 'modDiploidFusionOnly', targetDepth, sep = "_")
