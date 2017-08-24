@@ -8,7 +8,7 @@ doc: "Generate FastQ reads files"
 
 hints:
   DockerRequirement:
-    dockerPull: rnaseqsim
+    dockerPull: alliecreason/rnaseqsim
 
 requirements:
   - class: InlineJavascriptRequirement
