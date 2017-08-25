@@ -1,5 +1,5 @@
 import random
-import time
+#import time
 import gffutils
 from gffutils import biopython_integration
 
@@ -53,7 +53,7 @@ def getRandomFusions(db, names, num=5, pStay=0.0):
     # names is a vector of the ENSG gene ids (protein coding genes only) from module.py
     # num: number of fusions to simulate
     # pStay: the probability of staying in the same gene pair to generate another fusion isoform. Set to 0.0 to get only one isoform. 
-    random.seed(time.time())    #for final code, add parameters for seed
+    #random.seed(time.time())    #for final code, add parameters for seed
     
     res = list() # the list to store the dictionaries for fusions
                  # donorTranId, acceptorTranId donorJunction, acceptorJunction
