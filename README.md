@@ -1,6 +1,61 @@
 # rnaseqSim
 For SMC-RNA challenge, code for analyzing datasets of validated fusions and generating synthetic fusion data.
 
+## CWL Workflow:
+
+Running the workflow requires CWL v1.0+ and Docker.
+
+To run the workflow:
+
+`cwltool workflow/fusion_simulation_workflow.cwl [INPUT.JSON]`
+`cwltool workflow/fusion_simulation_workflow_all.cwl [INPUT.JSON]`
+
+The input JSON needs the fields:
+
+  SIM_NAME: string
+  GTF: File
+  NUM_EVENTS: int
+  TARGET_DEPTH: int
+  GENOME: File
+  EXPRESSION_PROFILE: File
+  RSEM_MODEL: File
+  DIP_GENOME: File
+
+And can use the optional fields
+  SEED: ["null", int]
+
+
+## Description of inputs
+
+SIM_NAME:
+GTF:
+NUM_EVENTS:
+TARGET_DEPTH:
+GENOME:
+EXPRESSION_PROFILE:
+RSEM_MODEL:
+DIP_GENOME:
+
+SEED: This is optional. If given all scripts with a random element in the 
+workflow will have a seed set at the given integer.
+
+
+## Description of outputs
+
+[SIM_NAME]_filtered.bedpe:
+
+[SIM_NAME]_isoforms_truth.txt:
+
+[SIM_NAME]_mergeSort_1.fq.gz:
+
+[SIM_NAME]_mergeSort_2.fq.gz:
+
+archive.tgz: This will store other intermeduate files if 
+`fusion_simulation_workflow_all.cwl`was used.
+
+
+# older descriptions:
+
 ## Requirements:
 
 [STAR 2.4.2a] (https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz)
@@ -38,9 +93,3 @@ Step 4 - Generate reads from diploid and fusion references:
 
 `fastq_create/generate_reads.py --totalReads [targetDepth * 1000000] --numSimReads [output.log] --simName [simName] --RSEMmodel [model file] --isoformTPM [model_isoforms output] --fusionTPM [model_isoforms output] --fusRef [fusion_create output]`
 
-
-## CWL Workflow:
-
-Still in progress ...
-
-`cwltool workflow/fusion_simulation_workflow.cwl [INPUT.JSON]`
