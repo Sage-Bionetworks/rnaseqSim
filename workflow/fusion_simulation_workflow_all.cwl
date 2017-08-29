@@ -30,7 +30,7 @@ outputs:
 steps:
 
   tar:
-    run: ../general_tools/tar.cwl
+    run: ../general_tools/tar_extract.cwl
     in:
       input: DIP_GENOME
 
@@ -80,7 +80,7 @@ steps:
     out: [isoformTruth, fastq1, fastq2] 
 
   archive:
-    run: ../general_tools/tar2.cwl
+    run: ../general_tools/tar_create.cwl
     in:
       fusion_gtf_file: fusion/fusGTF
       fusion_ref_file: fusion/fusRef
