@@ -30,7 +30,7 @@ outputs:
 steps:
 
   tar:
-    run: ../general_tools/tar.cwl
+    run: ../general_tools/tar_extract.cwl
     in:
       input: DIP_GENOME
 
