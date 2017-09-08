@@ -1,6 +1,7 @@
 import random
+from FusionEvent import FusionEvent
 #import time
-import gffutils
+#import gffutils
 from gffutils import biopython_integration
 
 MAX_TOSS_NUM = 100
@@ -96,14 +97,18 @@ def getRandomFusions(db, names, num=5, pStay=0.0):
                 dExonSF = list()
                 aExonSF = list()
                 for exon in dExons:
-                   dExonSF.append(biopython_integration.to_seqfeature(exon))
+                    dExonSF.append(biopython_integration.to_seqfeature(exon))
                 for exon in aExons:
-                   aExonSF.append(biopython_integration.to_seqfeature(exon))
+                    aExonSF.append(biopython_integration.to_seqfeature(exon))
                 if (len(dExonSF) > 0) and (len(aExonSF) > 0):
-                	# adjust junction positions to be 0-based
-                   res.append({'donorExons':dExonSF,'acceptorExons':aExonSF,'dJunction':dJunction-1,'aJunction':aJunction-1})
-                
-                   total = total + 1
+                    # create fusion event object, and adjust junction positions 
+                    # to be 0-based
+                    fus = FusionEvent({'donorExons':dExonSF,
+                                       'acceptorExons':aExonSF,
+                                       'dJunction':dJunction-1,
+                                       'aJunction':aJunction-1})
+                    res.append(fus)
+                    total = total + 1
             else:            
                tossed2 = tossed2  + 1
                if tossed2 > MAX_TOSS_NUM:

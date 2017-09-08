@@ -11,12 +11,16 @@ import random
 import time
 from Bio import SeqIO
 
-
-def run_module(genome_file, gtf_file, numEvents, simName):
+def run_module(genome_file, gtf_file, numEvents, simName, 
+               add_mid_exon_fusions = False, 
+               add_sense_antisense_fusions = False,
+               add_exon_duplications_and_deletions = False,
+               add_fusion_events_in_UTR = False):
 
     # Converting GTF file into a database
     database_filename = '.'.join([os.path.basename(gtf_file).rstrip('.gtf'), 'sqlite3'])     
     dbPath = os.path.join(os.path.dirname(gtf_file),database_filename)
+    print(dbPath)
 
     if os.path.isfile(dbPath):
         # Connect to an already-existing db
@@ -42,10 +46,27 @@ def run_module(genome_file, gtf_file, numEvents, simName):
     with open(''.join([simName, '.gtf']),'w') as gtf, open(''.join([simName, '_filtered.bedpe']),'w') as bedpe:
     # Get fusion events as tuples of Bio.Seq objects
     # TODO: Simplify return objects, possibly returning one event at a time instead of list
-       for event in fusions.getRandomFusions(db=db, names=protein_coding_genes, num=numEvents):
-           fObj = seqobjs.makeFusionSeqObj(donorExonSeq=event['donorExons'], acceptorExonSeq=event['acceptorExons'], dJunc=event['dJunction'],aJunc=event['aJunction'],genomeObj=hg19)
-           print(len(fObj))
-#           print(fObj)
+       for fusion_event in fusions2.getRandomFusions(db=db, names=protein_coding_genes, num=numEvents):
+           
+           if add_mid_exon_fusions:
+               fusion_event.add_mid_exon_fusion_breakpoints()
+           if add_sense_antisense_fusions:
+               fusion_event.add_sense_antisense_fusions()
+           if add_exon_duplications_and_deletions:
+               fusion_event.add_exon_duplications_and_deletions()
+           if add_fusion_events_in_UTR:
+               fusion_event.add_fusion_events_in_UTR()
+           print(fusion_event)
+           
+           fObj = seqobjs.makeFusionSeqObj(donorExonSeq = fusion_event['donorExons'], 
+                                           acceptorExonSeq = fusion_event['acceptorExons'], 
+                                           dJunc = fusion_event['dJunction'],
+                                           aJunc = fusion_event['aJunction'],
+                                           genomeObj = hg19)
+           print("---")
+           print(fObj)
+           print("---")
+           #print(len(fObj))
            seqobjs.writeGTF(fObj,gtf)
            seqobjs.writeBEDPE(fObj,bedpe)
            SeqIO.write(fObj, ''.join([fObj.id,'.fasta']), "fasta")
