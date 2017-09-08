@@ -94,7 +94,14 @@ if __name__ == '__main__':
     parser.add_argument('--numEvents', default=5, help='Number of filtered fusion events to generate.', type=int, required=False)
     parser.add_argument('--minLength', default=400, help='Minimum length of fusion transcript.', type=int, required=False)
     parser.add_argument("--simName", help="Prefix for the simulation filenames.", default='testSimulation', required=False)
-    parser.add_argument("--seed", help="Seed number to use for RSEM read simulation.", type=int, required=False, default = None)
+    parser.add_argument("--seed", 
+                        help = "Seed number to use for RSEM read simulation.", 
+                        type = int, 
+                        required = False, 
+                        default = None)
+    parser.add_argument('--mid_exon_fusions', 
+                        action = 'store_true', 
+                        help = 'whether to add mid exon fusions')   
     args = parser.parse_args()
     
     # set seed to seed arument, otherwise to time
@@ -103,5 +110,12 @@ if __name__ == '__main__':
     else: 
         random.seed(time.time)
     
-    fastaFN = run_module(genome_file=args.genome, gtf_file=args.gtf,numEvents=args.numEvents, simName=args.simName)
-    makeFusionReference(fastaList = fastaFN, simName = args.simName, numEvents = args.numEvents)
+    fastaFN = run_module(genome_file = args.genome, 
+                         gtf_file = args.gtf,
+                         numEvents = args.numEvents, 
+                         simName = args.simName,
+                         add_mid_exon_fusions = args.mid_exon_fusions)
+                         
+    makeFusionReference(fastaList = fastaFN, 
+                        simName = args.simName, 
+                        numEvents = args.numEvents)
