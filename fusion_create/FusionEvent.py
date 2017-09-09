@@ -11,38 +11,27 @@ import FusionEventFunctions as FEV
 
 class FusionEvent(dict):
     
-    def add_mid_exon_fusion_breakpoints(self, 
-                                        event_prob = 1.0, 
-                                        two_break_prob = 0.5,
-                                        left_break_prob = 0.5,
-                                        min_bases_removed = 1,
-                                        min_exon_size = 1):
+    def add_mid_exon_fusion_breakpoints(
+        self, 
+        event_prob = 1.0, 
+        two_break_prob = 0.5,
+        left_break_prob = 0.5,
+        min_bases_removed = 1,
+        min_exon_size = 1):
+            
         for exon_list in ['donorExons', 'acceptorExons']:
-            self.shorten_exons(self[exon_list],
-                               event_prob, 
-                               two_break_prob,
-                               left_break_prob,
-                               min_bases_removed,
-                               min_exon_size)
+            self.shorten_exons(self[exon_list], event_prob, two_break_prob,
+                left_break_prob, min_bases_removed, min_exon_size)
         
     @staticmethod
-    def shorten_exons(exon_list, 
-                      event_prob, 
-                      two_break_prob, 
-                      left_break_prob,
-                      min_bases_removed,
-                      min_exon_size):
+    def shorten_exons(exon_list, event_prob, two_break_prob, left_break_prob,
+        min_bases_removed, min_exon_size):
                           
         for exon in exon_list:
-            start, end = FEV.shorten_exon(exon, 
-                                          event_prob, 
-                                          two_break_prob, 
-                                          left_break_prob,
-                                          min_bases_removed,
-                                          min_exon_size)
+            start, end = FEV.shorten_exon(exon, event_prob, two_break_prob, 
+                left_break_prob, min_bases_removed, min_exon_size)
             exon.location = FeatureLocation(ExactPosition(start), 
-                                            ExactPosition(end), 
-                                            strand = exon.location.strand)
+                ExactPosition(end), strand = exon.location.strand)
 
                 
     
