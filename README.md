@@ -23,6 +23,12 @@ The input JSON needs the fields:
 
 And can use the optional fields
   SEED: ["null", int]
+  FUS_MID_EXON: ["null", boolean]
+  FUS_ME_EVENT_PROB: ["null", float]
+  FUS_ME_TWO_BREAK_PROB: ["null", float]
+  FUS_ME_LEFT_BREAK_PROB: ["null", float]
+  FUS_ME_MIN_BASES_REMOVED: ["null", int]
+  FUS_ME_MIN_EXON_SIZE: ["null", int]
 
 
 ## Description of inputs
@@ -36,9 +42,30 @@ EXPRESSION_PROFILE:
 RSEM_MODEL:
 DIP_GENOME:
 
-SEED: This is optional. If given all scripts with a random element in the 
+SEED: (optional) If given all scripts with a random element in the 
 workflow will have a seed set at the given integer.
 
+FUS_MID_EXON: (optional, flag) Durring fusion transcript generation,
+transcripts with mid-exon breaks will be made
+
+FUS_ME_EVENT_PROB: (optional) The float given will be the probaility 
+each exon in the fusion gene will be shortened on at least one side if possible 
+given FUS_MIN_BASES_REMOVED and FUS_ME_MIN_EXON_SIZE
+
+FUS_ME_TWO_BREAK_PROB: (optional) The float given will be the 
+probaility that the exon will be shortened on both sides if possible given 
+FUS_MIN_BASES_REMOVED and FUS_ME_MIN_EXON_SIZE
+
+FUS_ME_LEFT_BREAK_PROB: (optional) The float given will be the 
+probaility, if not on both sides, that the exon will be shortened on the left 
+side,  if possible given FUS_MIN_BASES_REMOVED and FUS_ME_MIN_EXON_SIZE
+
+FUS_ME_MIN_BASES_REMOVED: (optional) The int given will be the minimal
+amount of bases removed per shortening. 
+
+FUS_ME_MIN_EXON_SIZE: (optional) The int given will be minimum exon size as a 
+result of an exon shortening. If shortening would result in an exon smaller 
+than this, the shortening will not happen.
 
 ## Description of outputs
 
@@ -50,7 +77,7 @@ workflow will have a seed set at the given integer.
 
 [SIM_NAME]_mergeSort_2.fq.gz:
 
-archive.tgz: This will store other intermeduate files if 
+archive.tgz: This will store other intermediate files if 
 `fusion_simulation_workflow_all.cwl`was used.
 
 
