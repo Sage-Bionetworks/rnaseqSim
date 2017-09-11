@@ -11,12 +11,16 @@ import random
 import time
 from Bio import SeqIO
 
-def run_module(genome_file, gtf_file, numEvents, simName, 
-               add_mid_exon_fusions = False, 
+def run_module(genome_file, 
+               gtf_file, 
+               numEvents, 
+               simName, 
+               add_mid_exon_fusions,
+               mid_exon_args,
                add_sense_antisense_fusions = False,
                add_exon_duplications_and_deletions = False,
                add_fusion_events_in_UTR = False):
-
+    
     # Converting GTF file into a database
     database_filename = '.'.join([os.path.basename(gtf_file).rstrip('.gtf'), 'sqlite3'])     
     dbPath = os.path.join(os.path.dirname(gtf_file),database_filename)
@@ -49,7 +53,7 @@ def run_module(genome_file, gtf_file, numEvents, simName,
         for fusion_event in fusions.getRandomFusions(
             db = db, names = protein_coding_genes, num = numEvents):
             if add_mid_exon_fusions:
-                fusion_event.add_mid_exon_fusion_breakpoints()
+                fusion_event.add_mid_exon_fusion_breakpoints(*mid_exon_args)
             if add_sense_antisense_fusions:
                 fusion_event.add_sense_antisense_fusions()
             if add_exon_duplications_and_deletions:
@@ -94,14 +98,48 @@ if __name__ == '__main__':
     parser.add_argument('--numEvents', default=5, help='Number of filtered fusion events to generate.', type=int, required=False)
     parser.add_argument('--minLength', default=400, help='Minimum length of fusion transcript.', type=int, required=False)
     parser.add_argument("--simName", help="Prefix for the simulation filenames.", default='testSimulation', required=False)
-    parser.add_argument("--seed", 
-                        help = "Seed number to use for RSEM read simulation.", 
-                        type = int, 
-                        required = False, 
-                        default = None)
-    parser.add_argument('--mid_exon_fusions', 
-                        action = 'store_true', 
-                        help = 'whether to add mid exon fusions')   
+    parser.add_argument(
+        "--seed", 
+        help = "Seed number to use for RSEM read simulation.", 
+        type = int, 
+        required = False, 
+        default = None)
+    # mid exon fusion parameters ----------------------------------------------                  
+    parser.add_argument(
+        '--mid_exon_fusions', 
+        action = 'store_true', 
+        help = 'whether to add mid exon fusions')  
+    parser.add_argument(
+        '--me_event_prob', 
+        default = 1.0, 
+        help = 'Probability of mid exon breakage per exon',
+        type = float,
+        required=False)
+    parser.add_argument(
+        '--me_two_break_prob', 
+        default = 0.5, 
+        help = 'Probability of mid exon breakage on both sides of exon',
+        type = float,
+        required = False)
+    parser.add_argument(
+        '--me_left_break_prob', 
+        default = 0.5, 
+        help = 'Probability of mid exon breakage on left side of exon',
+        type = float,
+        required = False)
+    parser.add_argument(
+        '--me_min_bases_removed', 
+        default = 1, 
+        help = 'Min bases removed per mid-exon breakage',
+        type = int,
+        required = False)
+    parser.add_argument(
+        '--me_min_exon_size', 
+        default = 1, 
+        help = 'Probability of mid exon breakage on left side of exon',
+        type = int,
+        required = False)
+    
     args = parser.parse_args()
     
     # set seed to seed arument, otherwise to time
@@ -110,11 +148,18 @@ if __name__ == '__main__':
     else: 
         random.seed(time.time)
     
-    fastaFN = run_module(genome_file = args.genome, 
-                         gtf_file = args.gtf,
-                         numEvents = args.numEvents, 
-                         simName = args.simName,
-                         add_mid_exon_fusions = args.mid_exon_fusions)
+    mid_exon_args = (args.me_event_prob, 
+                     args.me_two_break_prob,
+                     args.me_left_break_prob, 
+                     args.me_min_bases_removed, 
+                     args.me_min_exon_size)
+                     
+    fastaFN = run_module(args.genome, 
+                         args.gtf,
+                         args.numEvents, 
+                         args.simName,
+                         args.mid_exon_fusions,
+                         mid_exon_args)
                          
     makeFusionReference(fastaList = fastaFN, 
                         simName = args.simName, 
