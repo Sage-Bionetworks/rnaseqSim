@@ -19,6 +19,12 @@ inputs:
   RSEM_MODEL: File
   DIP_GENOME: File
   SEED: ["null", int]
+  FUS_MID_EXON: ["null", boolean]
+  FUS_ME_EVENT_PROB: ["null", float]
+  FUS_ME_TWO_BREAK_PROB: ["null", float]
+  FUS_ME_LEFT_BREAK_PROB: ["null", float]
+  FUS_ME_MIN_BASES_REMOVED: ["null", int]
+  FUS_ME_MIN_EXON_SIZE: ["null", int]
 
 outputs:
   OUTPUT:
@@ -51,6 +57,12 @@ steps:
       numEvents: NUM_EVENTS
       simName: SIM_NAME
       seed: SEED
+      mid_exon_fusion: FUS_MID_EXON
+      me_event_prob: FUS_ME_EVENT_PROB
+      me_two_break_prob: FUS_ME_TWO_BREAK_PROB
+      me_left_break_prob: FUS_ME_LEFT_BREAK_PROB
+      me_min_bases_removed: FUS_ME_MIN_BASES_REMOVED
+      me_min_exon_size: FUS_ME_MIN_EXON_SIZE
 
     out: [fusGTF, fusRef, fusionTruth]
 
