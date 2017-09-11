@@ -10,15 +10,62 @@ doc: "command line: tar"
 
 inputs:
 
-  fusion_gtf_file:
+  fusion_log_file:
     type: File
     inputBinding:
       position: 1
 
-  fusion_ref_file:
-    type: File
+  fusion_FA_files:
+    type:
+      type: array
+      items: File
     inputBinding:
       position: 2
+
+  isoformTPM:
+    type: File
+    inputBinding:
+      position: 3
+
+  fusionTPM:
+    type: File
+    inputBinding:
+      position: 4
+
+  isoform_log_file:
+    type: File
+    inputBinding:
+      position: 5
+
+  dip_gene_results:
+    type: File
+    inputBinding:
+      position: 6
+
+  dip_iso_results:
+    type: File
+    inputBinding:
+      position: 7
+
+  fus_gene_results:
+    type: File
+    inputBinding:
+      position: 8
+
+  dip_iso_results:
+    type: File
+    inputBinding:
+      position: 9
+
+  key1:
+    type: File
+    inputBinding:
+      position: 10
+
+  key2:
+    type: File
+    inputBinding:
+      position: 11
 
 outputs:
 
