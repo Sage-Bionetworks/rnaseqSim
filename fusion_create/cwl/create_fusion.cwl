@@ -11,6 +11,7 @@ hints:
     dockerPull: alliecreason/rnaseqsim
 
 requirements:
+  - class: MultipleInputFeatureRequirement
   - class: InlineJavascriptRequirement
   - class: ResourceRequirement
     coresMin: 
@@ -96,6 +97,16 @@ outputs:
     outputBinding:
       glob: $(inputs.simName + ".gtf")
 
+  fusLog:
+    type: stdout
+
+  fusFA:
+    type:
+      type: array
+      items: File
+    outputBinding:
+      glob: "*.fasta"
+
   fusRef:
     type: File
     outputBinding:
@@ -104,7 +115,6 @@ outputs:
      - ^.chrlist
      - ^.grp
      - ^.idx.fa
-     - ^Log.out
      - ^.n2g.idx.fa
      - ^.ti
      - ^.transcripts.fa

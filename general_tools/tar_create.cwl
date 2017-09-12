@@ -57,15 +57,20 @@ inputs:
     inputBinding:
       position: 9
 
-  key1:
+  fus_iso_results:
     type: File
     inputBinding:
       position: 10
 
-  key2:
+  key1:
     type: File
     inputBinding:
       position: 11
+
+  key2:
+    type: File
+    inputBinding:
+      position: 12
 
 outputs:
 
