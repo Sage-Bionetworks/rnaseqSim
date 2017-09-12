@@ -17,6 +17,8 @@ requirements:
     coresMin: 
     ramMin: 
 
+stdout: fus.log
+
 inputs:
 
   gtf:
