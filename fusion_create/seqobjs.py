@@ -10,8 +10,7 @@ def readGenome(fasta):
     return(genome_dict)
     
     
-def makeFusionSeqObj(donorExonSeq,acceptorExonSeq,dJunc,aJunc,genomeObj):
-
+def makeFusionSeqObj(donorExonSeq, acceptorExonSeq, dJunc, aJunc, genomeObj):
     dName = donorExonSeq[0].qualifiers['transcript_id'][0]
     aName = acceptorExonSeq[0].qualifiers['transcript_id'][0]
     fusionId = '-'.join([dName, aName])
@@ -71,7 +70,12 @@ def writeGTF(record,GTFfh):
     
 def writeBEDPE(record,BEDPEfh):
     """"Writes a BEDPE entry for a gene fusion junction."""
-    
+    print("--------")
+    print(record)
+    print(record.annotations)
+    print(record.annotations['dJunction'])
+    print(record.annotations['aJunction'])
+    print("--------")
     (transA, transB) = record.id.split('-')
     # add 1 to position to be consistent with BED 0-based numbering    
     downstreamA = int(record.annotations['dJunction']) + 1

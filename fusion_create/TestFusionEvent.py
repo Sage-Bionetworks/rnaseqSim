@@ -5,72 +5,84 @@ from Bio.SeqFeature import SeqFeature
 from Bio.SeqFeature import FeatureLocation
 from Bio.SeqFeature import ExactPosition
 import unittest
+import random
 
 class TestFusionEvent(unittest.TestCase):
     
     def setUp(self):
-        self.exon1 = SeqFeature(FeatureLocation(ExactPosition(95451328), 
-                                          ExactPosition(95451419), 
-                                          strand = -1),
-                          type = 'exon', id = 'exon_770035')
-        self.exon2 = SeqFeature(FeatureLocation(ExactPosition(131618), 
-                                          ExactPosition(131645), 
-                                          strand = -1), 
-                          type = 'exon', id = 'exon_956247')
+        self.exon1 = SeqFeature(FeatureLocation(ExactPosition(100), 
+                                                ExactPosition(500), 
+                                                strand = -1),
+                          type = 'exon', id = 'exon_1')
+        self.exon2 = SeqFeature(FeatureLocation(ExactPosition(800), 
+                                                ExactPosition(1000), 
+                                                strand = -1),
+                          type = 'exon', id = 'exon_2')
+        self.exon3 = SeqFeature(FeatureLocation(ExactPosition(1500), 
+                                                ExactPosition(2000), 
+                                                strand = -1),
+                          type = 'exon', id = 'exon_3')
+        self.exon4 = SeqFeature(FeatureLocation(ExactPosition(10000), 
+                                                ExactPosition(15000), 
+                                                strand = -1),
+                          type = 'exon', id = 'exon_4')
+        self.exon5 = SeqFeature(FeatureLocation(ExactPosition(17000), 
+                                                ExactPosition(20000), 
+                                                strand = -1),
+                          type = 'exon', id = 'exon_5')
+        self.exon6 = SeqFeature(FeatureLocation(ExactPosition(22000), 
+                                                ExactPosition(25000), 
+                                                strand = -1),
+                          type = 'exon', id = 'exon_6')
+        self.exons1 = [self.exon1, self.exon2, self.exon3]
+        self.exons2 = [self.exon4, self.exon5, self.exon6]
+        self.FE1 = FusionEvent(self.exons1, self.exons2, "-", "-")
+        self.FE2 = FusionEvent(self.exons1, self.exons2, "+", "+")
                           
-        self.FE = FusionEvent({
-              'dJunction': 95451328, 
-              'aJunction': 169339, 
-              'donorExons': [self.exon1], 
-              'acceptorExons': [self.exon2]})
-               
-    def test_add_mid_exon_fusion_breakpoints1(self):
-        # event_prob is 0, so nothing changes
-        self.FE.add_mid_exon_fusion_breakpoints(event_prob = 0.0)
-        self.assertEqual(self.FE['donorExons'][0].location.start, 95451328)
-        self.assertEqual(self.FE['donorExons'][0].location.end, 95451419)
-        self.assertEqual(self.FE['acceptorExons'][0].location.start, 131618)
-        self.assertEqual(self.FE['acceptorExons'][0].location.end, 131645)
-        self.setUp()
-        # two_break_prob is 1.0, so all positions will change
-        
-    def test_add_mid_exon_fusion_breakpoints2(self):
-        self.FE.add_mid_exon_fusion_breakpoints(event_prob = 1.0, 
-                                                two_break_prob = 1.0)
-        self.assertNotEqual(self.FE['donorExons'][0].location.start, 95451328)
-        self.assertNotEqual(self.FE['donorExons'][0].location.end, 95451419)
-        self.assertNotEqual(self.FE['acceptorExons'][0].location.start, 131618)
-        self.assertNotEqual(self.FE['acceptorExons'][0].location.end, 131645)
-        self.setUp()
+
+    def test_getters(self):
+        self.assertEqual(self.FE1.get_acceptor_exons(), self.exons2)
+        self.assertEqual(self.FE1.get_donor_exons(), self.exons1)
+        self.assertEqual(self.FE1.get_acceptor_strand(), "-")
+        self.assertEqual(self.FE1.get_donor_strand(), "-")
+        self.assertEqual(self.FE1.get_acceptor_junction(), None)
+        self.assertEqual(self.FE1.get_donor_junction(), None)
     
-    def test_add_mid_exon_fusion_breakpoints3(self):
-        # two_break_prob is 0.0, left_break_prob is 1.0, so all starts will 
-        # change
-        self.FE.add_mid_exon_fusion_breakpoints(event_prob = 1.0, 
-                                                two_break_prob = 0.0,
-                                                left_break_prob = 1.0)
-        self.assertNotEqual(self.FE['donorExons'][0].location.start, 95451328)
-        self.assertEqual(self.FE['donorExons'][0].location.end, 95451419)
-        self.assertNotEqual(self.FE['acceptorExons'][0].location.start, 131618)
-        self.assertEqual(self.FE['acceptorExons'][0].location.end, 131645)
-        self.setUp()
+    def test_create_breakage(self):
+        # both strands are "-", donor gets cut off on left, acceptor on right
+        random.seed(1)
+        res1 = self.FE1.create_breakage("donor")
+        self.assertEqual(res1[0], 799)
+        self.assertEqual(res1[1], [self.exon2, self.exon3])
+        random.seed(1)
+        res2 = self.FE1.create_breakage("acceptor")
+        self.assertEqual(res2[0], 14999)
+        self.assertEqual(res2[1], [self.exon4])
+        # both strands are "+", donor gets cut off on right, acceptor on left
+        random.seed(1)
+        res3 = self.FE2.create_breakage("donor")
+        self.assertEqual(res3[0], 499)
+        self.assertEqual(res3[1], [self.exon1])
+        random.seed(4)
+        res4 = self.FE2.create_breakage("acceptor")
+        self.assertEqual(res4[0], 16999)
+        self.assertEqual(res4[1], [self.exon5, self.exon6])
         
-    def test_add_mid_exon_fusion_breakpoints4(self):
-        # two_break_prob is 0.0, left_break_prob is 0.0, so all ends will 
-        # change
-        self.FE.add_mid_exon_fusion_breakpoints(event_prob = 1.0, 
-                                                two_break_prob = 0.0,
-                                                left_break_prob = 0.0)
-        self.assertEqual(self.FE['donorExons'][0].location.start, 95451328)
-        self.assertNotEqual(self.FE['donorExons'][0].location.end, 95451419)
-        self.assertEqual(self.FE['acceptorExons'][0].location.start, 131618)
-        self.assertNotEqual(self.FE['acceptorExons'][0].location.end, 131645)
-        self.setUp()
-        
-  
- 
+        # mid exon breakages
+        random.seed(2)
+        res5 = self.FE1.create_breakage("donor", True)
+        self.assertEqual(res5[0], 1972)
+        self.assertEqual(res5[1][0].location.start, ExactPosition(1973))
+        self.assertEqual(res5[1][0].location.end, ExactPosition(2000))
+        random.seed(2)
+        res6 = self.FE1.create_breakage("acceptor", True)
+        self.assertEqual(res6[0], 24842)
+        self.assertEqual(res6[1][0].location.start, ExactPosition(10000))
+        self.assertEqual(res6[1][0].location.end, ExactPosition(15000))
+        self.assertEqual(res6[1][1].location.start, ExactPosition(17000))
+        self.assertEqual(res6[1][1].location.end, ExactPosition(20000))                 
+        self.assertEqual(res6[1][2].location.start, ExactPosition(22000))
+        self.assertEqual(res6[1][2].location.end, ExactPosition(24843))                             
 
 if __name__ == '__main__':
     unittest.main()
-
-

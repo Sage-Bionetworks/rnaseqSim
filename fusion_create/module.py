@@ -8,15 +8,13 @@ import gffutils
 import fusions
 import seqobjs
 import random
-import time
 from Bio import SeqIO
 
 def run_module(genome_file, 
                gtf_file, 
                numEvents, 
                simName, 
-               add_mid_exon_fusions,
-               mid_exon_args,
+               mid_exon_fusions,
                add_sense_antisense_fusions = False,
                add_exon_duplications_and_deletions = False,
                add_fusion_events_in_UTR = False):
@@ -52,25 +50,14 @@ def run_module(genome_file,
     # TODO: Simplify return objects, possibly returning one event at a time instead of list
         for fusion_event in fusions.getRandomFusions(
             db = db, names = protein_coding_genes, num = numEvents):
-            if add_mid_exon_fusions:
-                fusion_event.add_mid_exon_fusion_breakpoints(*mid_exon_args)
-            if add_sense_antisense_fusions:
-                fusion_event.add_sense_antisense_fusions()
-            if add_exon_duplications_and_deletions:
-                fusion_event.add_exon_duplications_and_deletions()
-            if add_fusion_events_in_UTR:
-                fusion_event.add_fusion_events_in_UTR()
-            print(fusion_event)
+            fusion_event.create_breakages(mid_exon_fusions)
             fObj = seqobjs.makeFusionSeqObj(
-                donorExonSeq = fusion_event['donorExons'], 
-                acceptorExonSeq = fusion_event['acceptorExons'],
-                dJunc = fusion_event['dJunction'],
-                aJunc = fusion_event['aJunction'],
+                donorExonSeq = fusion_event.get_donor_exons(), 
+                acceptorExonSeq = fusion_event.get_acceptor_exons(),
+                dJunc = fusion_event.get_donor_junction(),
+                aJunc = fusion_event.get_acceptor_junction(),
                 genomeObj = hg19)
-            print("---")
-            print(fObj)
-            print("---")
-            #print(len(fObj))
+            print(len(fObj))
             seqobjs.writeGTF(fObj,gtf)
             seqobjs.writeBEDPE(fObj,bedpe)
             SeqIO.write(fObj, ''.join([fObj.id,'.fasta']), "fasta")
@@ -109,57 +96,48 @@ if __name__ == '__main__':
         '--mid_exon_fusions', 
         action = 'store_true', 
         help = 'whether to add mid exon fusions')  
-    parser.add_argument(
-        '--me_event_prob', 
-        default = 1.0, 
-        help = 'Probability of mid exon breakage per exon',
-        type = float,
-        required=False)
-    parser.add_argument(
-        '--me_two_break_prob', 
-        default = 0.5, 
-        help = 'Probability of mid exon breakage on both sides of exon',
-        type = float,
-        required = False)
-    parser.add_argument(
-        '--me_left_break_prob', 
-        default = 0.5, 
-        help = 'Probability of mid exon breakage on left side of exon',
-        type = float,
-        required = False)
-    parser.add_argument(
-        '--me_min_bases_removed', 
-        default = 1, 
-        help = 'Min bases removed per mid-exon breakage',
-        type = int,
-        required = False)
-    parser.add_argument(
-        '--me_min_exon_size', 
-        default = 1, 
-        help = 'Probability of mid exon breakage on left side of exon',
-        type = int,
-        required = False)
+#    parser.add_argument(
+#        '--me_event_prob', 
+#        default = 1.0, 
+#        help = 'Probability of mid exon breakage per exon',
+#        type = float,
+#        required=False)
+#    parser.add_argument(
+#        '--me_two_break_prob', 
+#        default = 0.5, 
+#        help = 'Probability of mid exon breakage on both sides of exon',
+#        type = float,
+#        required = False)
+#    parser.add_argument(
+#        '--me_left_break_prob', 
+#        default = 0.5, 
+#        help = 'Probability of mid exon breakage on left side of exon',
+#        type = float,
+#        required = False)
+#    parser.add_argument(
+#        '--me_min_bases_removed', 
+#        default = 1, 
+#        help = 'Min bases removed per mid-exon breakage',
+#        type = int,
+#        required = False)
+#    parser.add_argument(
+#        '--me_min_exon_size', 
+#        default = 1, 
+#        help = 'Probability of mid exon breakage on left side of exon',
+#        type = int,
+#        required = False)
     
     args = parser.parse_args()
     
     # set seed to seed arument, otherwise to time
     if isinstance(args.seed, (int, long)):
         random.seed(args.seed)
-    else: 
-        random.seed(time.time)
-    
-    mid_exon_args = (args.me_event_prob, 
-                     args.me_two_break_prob,
-                     args.me_left_break_prob, 
-                     args.me_min_bases_removed, 
-                     args.me_min_exon_size)
                      
     fastaFN = run_module(args.genome, 
                          args.gtf,
                          args.numEvents, 
                          args.simName,
-                         args.mid_exon_fusions,
-                         mid_exon_args)
+                         args.mid_exon_fusions)
                          
     makeFusionReference(fastaList = fastaFN, 
                         simName = args.simName, 

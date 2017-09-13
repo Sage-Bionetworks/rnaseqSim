@@ -4,82 +4,67 @@ Created on Thu Sep  7 15:13:52 2017
 
 @author: aelamb
 """
+from Bio.SeqFeature import SeqFeature
+from Bio.SeqFeature import FeatureLocation
+from Bio.SeqFeature import ExactPosition
 import random
 
-def shorten_exon(exon, 
-                 event_prob, 
-                 two_break_prob, 
-                 left_break_prob,
-                 min_bases_removed,
-                 min_exon_size):
-                          
-    event = determine_exon_event(exon, 
-                                 event_prob, 
-                                 two_break_prob, 
-                                 left_break_prob,
-                                 min_bases_removed,
-                                 min_exon_size)     
-    if event == "none":
-        # exon will not be shortened
+
+def get_direction(strand, strand_dir):
+    if ((strand == "donor" and strand_dir == "+") or 
+        (strand == "acceptor" and strand_dir == "-")):
+        direction = "forward"
+    else:
+        direction = "reverse"
+    return(direction)
+
+def get_junction_range(exons, direction, mid_exon_fusions):
+     first_possible_exon_junction = 0
+     last_possible_exon_junction = len(exons) - 1
+     if not mid_exon_fusions:
+         if direction == "forward":
+             last_possible_exon_junction -= 1 
+         else:
+             first_possible_exon_junction += 1
+     return(first_possible_exon_junction, last_possible_exon_junction)
+
+def create_mid_exon_breakage(exons, junction_exon_n, direction):
+    junc_exon = exons[junction_exon_n]
+    first_possible_base = junc_exon.location.start + 1
+    last_possible_base = junc_exon.location.end - 1
+    junction = ExactPosition(random.randint(
+        first_possible_base, last_possible_base))
+    if direction == "forward":
+        exons[junction_exon_n] = create_new_exon(junc_exon, "end", junction)
+    else:
+        exons[junction_exon_n] = create_new_exon(junc_exon, "start", junction)
+    exons = slice_exons_at_fusion_exon(exons, junction_exon_n, direction)
+    return(junction, exons)
+
+def create_exon_breakage(exons, junction_exon_n, direction):
+    if direction == "forward":
+        junction = exons[junction_exon_n].location.end
+    else:
+        junction = exons[junction_exon_n].location.start
+    exons = slice_exons_at_fusion_exon(exons, junction_exon_n, direction)
+    return(junction, exons)
+    
+def slice_exons_at_fusion_exon(exons, junction_exon_n, direction):
+    if direction == "forward":
+        exons = exons[0:junction_exon_n + 1]
+    else:
+        exons = exons[junction_exon_n: len(exons)] 
+    return(exons)
+
+def create_new_exon(exon, loc_name, new_position):
+    if loc_name == 'start':
+        start = new_position
+        end = exon.location.end
+    else:
         start = exon.location.start
-        end =  exon.location.end
-    elif event == "both":
-        # exon will be shortened on both sides
-        start, end = shorten_exon_on_both_sides(
-                exon, min_bases_removed, min_exon_size)
-    elif event == "left":
-        # exon will be shortened on left side
-        start, end = shorten_exon_on_start(
-                exon, min_bases_removed, min_exon_size)
-    else:
-        # exon will be shortened on right side
-        start, end = shorten_exon_on_end(
-                exon, min_bases_removed, min_exon_size)   
-    return(start, end)
-
-def determine_exon_event(exon, 
-                         event_prob, 
-                         two_break_prob, 
-                         left_break_prob,
-                         min_bases_removed,
-                         min_exon_size):
-    max_breaks = determine_exon_max_breaks(
-        exon, min_bases_removed, min_exon_size)
-    if random.random() > event_prob or max_breaks == 0:
-        return("none")
-    elif random.random() <= two_break_prob and max_breaks == 2:
-        return("both")
-    elif random.random() <= left_break_prob:
-        return("left")
-    else:
-        return("right")
-
-def determine_exon_max_breaks(exon, min_bases_removed, min_exon_size):
-    exon_length = abs(exon.location.end - exon.location.start)
-    if exon_length - (2 * min_bases_removed + min_exon_size) >= 0:
-        return(2)
-    elif exon_length - (min_bases_removed + min_exon_size) >= 0:
-        return(1)
-    else:
-        return(0)
-
-                
-def shorten_exon_on_start(exon, min_bases_removed, min_exon_size):
-    exon_break = random.randint(exon.location.start + min_bases_removed, 
-                                exon.location.end - min_exon_size)
-    return(exon_break, exon.location.end)
-
-def shorten_exon_on_end(exon, min_bases_removed, min_exon_size):
-    exon_break = random.randint(exon.location.start + min_exon_size, 
-                                exon.location.end - min_bases_removed)
-    return(exon.location.start, exon_break)
-        
-def shorten_exon_on_both_sides(exon, min_bases_removed, min_exon_size):
-    break1_min = exon.location.start + min_bases_removed
-    break1_max = exon.location.end - (min_exon_size + min_bases_removed)
-    exon_break1 = random.randint(break1_min, break1_max)
-    break2_min = exon_break1 + min_exon_size
-    break2_max = exon.location.end  - min_bases_removed
-    exon_break2 = random.randint(break2_min, break2_max)
-    exon_breaks = [exon_break1, exon_break2]                       
-    return(exon_breaks)
+        end = new_position
+    new_loc = FeatureLocation(ExactPosition(start), 
+                              ExactPosition(end), 
+                              exon.location.strand)                       
+    return(SeqFeature(
+        new_loc, type = 'exon', id = exon.id, qualifiers = exon.qualifiers))
