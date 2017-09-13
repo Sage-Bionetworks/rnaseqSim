@@ -51,41 +51,11 @@ inputs:
       position: 1
       prefix: --seed
 
-  mid_exon_fusion:
+  mid_exon_fusions:
     type: ["null", boolean]
     inputBinding:
       position: 1
       prefix: --mid_exon_fusions
-
-  me_event_prob:
-    type: ["null", float]
-    inputBinding:
-      position: 1
-      prefix: --me_event_prob
-
-  me_two_break_prob:
-    type: ["null", float]
-    inputBinding:
-      position: 1
-      prefix: --me_two_break_prob
-
-  me_left_break_prob:
-    type: ["null", float]
-    inputBinding:
-      position: 1
-      prefix: --me_left_break_prob
-
-  me_min_bases_removed:
-    type: ["null", int]
-    inputBinding:
-      position: 1
-      prefix: --me_min_bases_removed
-
-  me_min_exon_size:
-    type: ["null", int]
-    inputBinding:
-      position: 1
-      prefix: --me_min_exon_size
 
 outputs:
 
