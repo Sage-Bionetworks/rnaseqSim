@@ -19,6 +19,21 @@ if __name__ == "__main__":
     parser.add_argument("--dipGenome", default="GRCh37v75_STAR.tar.gz")
     parser.add_argument("--inputDir", default="/home/ubuntu/inputs")
     parser.add_argument("--bucket", default="gs://smc-rna-eval")
+    parser.add_argument(
+        "--dont_download_dip_genome", 
+        help = "don't download the diploid genome from bucket",
+        action = 'store_true')
+    parser.add_argument(
+        "--seed", 
+        help = "Seed number to use for RSEM read simulation.", 
+        type = int, 
+        required = False, 
+        default = None)
+    parser.add_argument(
+        '--mid_exon_fusions', 
+        action = 'store_true', 
+        help = 'whether to add mid exon fusions')
+        
     args = parser.parse_args()
     
     syn = synapseclient.Synapse()
@@ -28,11 +43,14 @@ if __name__ == "__main__":
     RSEMmodel = syn.get(args.RSEMmodel)
     genome = syn.get(args.genome)
     gtf = syn.get(args.gtf)
-
-    dipGenome = '/'.join([args.bucket,args.dipGenome])
-    subprocess.check_call(["gsutil", "cp", "-r", dipGenome, args.inputDir])
-    dipGenome = '/'.join([args.inputDir,args.dipGenome])
-
+    
+    if args.dont_download_dip_genome:
+        dipGenome = args.dipGenome
+    else:
+        dipGenome = '/'.join([args.bucket,args.dipGenome])
+        subprocess.check_call(["gsutil", "cp", "-r", dipGenome, args.inputDir])
+        dipGenome = '/'.join([args.inputDir,args.dipGenome])
+    
     job = {
         "SIM_NAME" : "%s" % (args.simName),
         "GTF" : {
@@ -58,6 +76,12 @@ if __name__ == "__main__":
             "path" : "%s" % (dipGenome)
         }
     }
+    
+    if isinstance(args.seed, (int, long)):
+        job["SEED"] = args.seed
+    
+    if args.mid_exon_fusions:
+        job["MID_EXON_FUSIONS"] = True
 
     input_path = os.path.join(args.inputDir, "input.json")
     with open(input_path, "w") as handle:
