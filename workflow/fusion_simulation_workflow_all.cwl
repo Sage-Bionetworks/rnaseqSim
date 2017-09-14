@@ -19,6 +19,7 @@ inputs:
   RSEM_MODEL: File
   DIP_GENOME: File
   SEED: ["null", int]
+  MID_EXON_FUSIONS: ["null", boolean]
 
 outputs:
   OUTPUT:
@@ -51,6 +52,7 @@ steps:
       numEvents: NUM_EVENTS
       simName: SIM_NAME
       seed: SEED
+      mid_exon_fusions: MID_EXON_FUSIONS
 
     out: [fusGTF, fusRef, fusionTruth, fusLog, fusFA]
 
