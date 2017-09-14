@@ -23,6 +23,7 @@ The input JSON needs the fields:
 
 And can use the optional fields
   SEED: ["null", int]
+  MID_EXON_FUSIONS: ["null", boolean]
 
 ## Description of inputs
 
@@ -37,6 +38,9 @@ DIP_GENOME:
 
 SEED: (optional) If given all scripts with a random element in the 
 workflow will have a seed set at the given integer.
+
+MID_EXON_FUSIONS: (optional) If set to true, fusions will happen in the middle 
+of exons
 
 ## Description of outputs
 
