@@ -129,7 +129,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
-    # set seed to seed arument, otherwise to time
+    # set seed to seed arument
     if isinstance(args.seed, (int, long)):
         random.seed(args.seed)
                      
