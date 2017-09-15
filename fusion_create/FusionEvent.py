@@ -4,7 +4,7 @@ Created on Thu Sep  7 07:34:53 2017
 
 @author: aelamb
 """
-import FusionEventFunctions as FEV
+import FusionEventFunctions as FEF
 import random
 
 class FusionEvent(object):
@@ -61,18 +61,18 @@ class FusionEvent(object):
         else:
             exons = self.acceptor_exons
             strand_dir = self.acceptor_strand
-        direction = FEV.get_direction(strand, strand_dir)
-        junction_range = FEV.get_junction_range(
+        direction = FEF.get_direction(strand, strand_dir)
+        junction_range = FEF.get_junction_range(
             exons, direction, mid_exon_fusions)
         junction_exon_n = random.randint(*junction_range)
-        fusion_type = FEV.determine_fusion_type(
+        fusion_type = FEF.determine_fusion_type(
             exons, junction_exon_n, mid_exon_fusions, mid_exon_prob, 
             min_exon_size, min_exon_cleaved)
         if fusion_type == "mid-exon":
-            junction, exons = FEV.create_mid_exon_breakage(
+            junction, exons = FEF.create_mid_exon_breakage(
                 exons, junction_exon_n, direction)
         else:
-            junction, exons = FEV.create_exon_breakage(
+            junction, exons = FEF.create_exon_breakage(
                 exons, junction_exon_n, direction)
         junction -= 1
         return(junction, exons)
