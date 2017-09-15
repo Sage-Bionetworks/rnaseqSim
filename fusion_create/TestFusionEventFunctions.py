@@ -28,6 +28,23 @@ class TestFusionEventFunctions(unittest.TestCase):
         self.assertEqual(FEV.get_direction("acceptor", "-"), "forward")
         self.assertEqual(FEV.get_direction("donor", "-"), "reverse")
         self.assertEqual(FEV.get_direction("acceptor", "+"), "reverse")
+    
+    def test_determine_fusion_type(self):
+        self.assertEqual(FEV.determine_fusion_type(
+            self.exons1, 0, True, 0.0, 1, 1), "standard")
+        self.assertEqual(FEV.determine_fusion_type(
+            self.exons1, 0, False, 1.0, 1, 1), "standard")
+        self.assertEqual(FEV.determine_fusion_type(
+            self.exons1, 0, True, 1.0, 1, 1), "mid-exon")
+        self.assertEqual(FEV.determine_fusion_type(
+            self.exons1, 0, True, 1.0, 300, 100), "mid-exon")
+        self.assertEqual(FEV.determine_fusion_type(
+            self.exons1, 0, True, 1.0, 300, 101), "standard")
+        
+    
+    def test_is_exon_breakable(self):
+        self.assertTrue(FEV.is_exon_breakable(self.exon1, 300, 100))
+        self.assertFalse(FEV.is_exon_breakable(self.exon1, 300, 101))
         
     def test_create_mid_exon_breakage(self):
         # exons are cut to the right of the junction exon, and the junction is

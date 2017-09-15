@@ -17,7 +17,7 @@ def get_direction(strand, strand_dir):
     else:
         direction = "reverse"
     return(direction)
-
+    
 def get_junction_range(exons, direction, mid_exon_fusions):
      first_possible_exon_junction = 0
      last_possible_exon_junction = len(exons) - 1
@@ -27,6 +27,23 @@ def get_junction_range(exons, direction, mid_exon_fusions):
          else:
              first_possible_exon_junction += 1
      return(first_possible_exon_junction, last_possible_exon_junction)
+
+def determine_fusion_type(exons, junction_exon_n, mid_exon_fusions, 
+    mid_exon_prob, min_exon_size, min_exon_cleaved):
+    if not mid_exon_fusions:
+        return("standard")
+    elif random.random() > mid_exon_prob:
+        return("standard")
+    elif not is_exon_breakable(
+        exons[junction_exon_n], min_exon_size, min_exon_cleaved):
+        return("standard")
+    else:
+        return("mid-exon")
+        
+def is_exon_breakable(exon, min_exon_size, min_exon_cleaved):
+    exon_size = abs(exon.location.start - exon.location.end)
+    min_exon_left = exon_size - min_exon_cleaved
+    return(min_exon_left >= min_exon_size)
 
 def create_mid_exon_breakage(exons, junction_exon_n, direction):
     junc_exon = exons[junction_exon_n]
@@ -40,6 +57,16 @@ def create_mid_exon_breakage(exons, junction_exon_n, direction):
         exons[junction_exon_n] = create_new_exon(junc_exon, "start", junction)
     exons = slice_exons_at_fusion_exon(exons, junction_exon_n, direction)
     return(junction, exons)
+
+
+
+
+#def find_mid_exon_breakage_range():
+#    if exon_len -(min_exon_size + min_exon_cleaved):
+#        
+#    if direction = "forward":
+#        base1 = exon.location.start + min_exon_size
+    
 
 def create_exon_breakage(exons, junction_exon_n, direction):
     if direction == "forward":

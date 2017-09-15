@@ -36,13 +36,25 @@ class FusionEvent(object):
     def get_acceptor_junction(self):
         return(self.acceptor_junction)
     
-    def create_breakages(self, mid_exon_fusions = False):
+    def create_breakages(self, 
+                         mid_exon_fusions = False,
+                         mid_exon_prob = 0.0,
+                         min_exon_size = 1, 
+                         min_exon_cleaved = 1):
+                             
         self.donor_junction, self.donor_exons = self.create_breakage(
-            "donor", mid_exon_fusions)
+            "donor", mid_exon_fusions, mid_exon_prob, min_exon_size, 
+            min_exon_cleaved)
         self.acceptor_junction, self.acceptor_exons = self.create_breakage(
-            "acceptor", mid_exon_fusions)
+            "acceptor", mid_exon_fusions, mid_exon_prob, min_exon_size, 
+            min_exon_cleaved)
         
-    def create_breakage(self, strand, mid_exon_fusions = False):
+    def create_breakage(self, strand,
+                        mid_exon_fusions = False,
+                        mid_exon_prob = 0.0,
+                        min_exon_size = 1, 
+                        min_exon_cleaved = 1):
+                            
         if strand == "donor":
             exons = self.donor_exons
             strand_dir = self.donor_strand
@@ -53,7 +65,10 @@ class FusionEvent(object):
         junction_range = FEV.get_junction_range(
             exons, direction, mid_exon_fusions)
         junction_exon_n = random.randint(*junction_range)
-        if mid_exon_fusions:
+        fusion_type = FEV.determine_fusion_type(
+            exons, junction_exon_n, mid_exon_fusions, mid_exon_prob, 
+            min_exon_size, min_exon_cleaved)
+        if fusion_type == "mid-exon":
             junction, exons = FEV.create_mid_exon_breakage(
                 exons, junction_exon_n, direction)
         else:

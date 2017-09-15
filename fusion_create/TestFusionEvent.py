@@ -70,19 +70,23 @@ class TestFusionEvent(unittest.TestCase):
         
         # mid exon breakages
         random.seed(2)
-        res5 = self.FE1.create_breakage("donor", True)
-        self.assertEqual(res5[0], 1972)
-        self.assertEqual(res5[1][0].location.start, ExactPosition(1973))
+        res5 = self.FE1.create_breakage("donor", 
+                                        mid_exon_fusions = True, 
+                                        mid_exon_prob = 1.0)
+        self.assertEqual(res5[0], 1528)
+        self.assertEqual(res5[1][0].location.start, ExactPosition(1529))
         self.assertEqual(res5[1][0].location.end, ExactPosition(2000))
         random.seed(2)
-        res6 = self.FE1.create_breakage("acceptor", True)
-        self.assertEqual(res6[0], 24842)
+        res6 = self.FE1.create_breakage("acceptor", 
+                                        mid_exon_fusions = True,
+                                        mid_exon_prob = 1.0)
+        self.assertEqual(res6[0], 22169)
         self.assertEqual(res6[1][0].location.start, ExactPosition(10000))
         self.assertEqual(res6[1][0].location.end, ExactPosition(15000))
         self.assertEqual(res6[1][1].location.start, ExactPosition(17000))
         self.assertEqual(res6[1][1].location.end, ExactPosition(20000))                 
         self.assertEqual(res6[1][2].location.start, ExactPosition(22000))
-        self.assertEqual(res6[1][2].location.end, ExactPosition(24843))                             
+        self.assertEqual(res6[1][2].location.end, ExactPosition(22170))                             
 
 if __name__ == '__main__':
     unittest.main()
