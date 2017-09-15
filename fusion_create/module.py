@@ -15,6 +15,9 @@ def run_module(genome_file,
                numEvents, 
                simName, 
                mid_exon_fusions,
+               mid_exon_prob,
+               mid_exon_min_size,
+               mid_exon_min_cleaved,
                add_sense_antisense_fusions = False,
                add_exon_duplications_and_deletions = False,
                add_fusion_events_in_UTR = False):
@@ -50,7 +53,9 @@ def run_module(genome_file,
     # TODO: Simplify return objects, possibly returning one event at a time instead of list
         for fusion_event in fusions.getRandomFusions(
             db = db, names = protein_coding_genes, num = numEvents):
-            fusion_event.create_breakages(mid_exon_fusions)
+            fusion_event.create_breakages(
+                mid_exon_fusions,  mid_exon_prob, mid_exon_min_size, 
+                mid_exon_min_cleaved)
             fObj = seqobjs.makeFusionSeqObj(
                 donorExonSeq = fusion_event.get_donor_exons(), 
                 acceptorExonSeq = fusion_event.get_acceptor_exons(),
@@ -96,36 +101,25 @@ if __name__ == '__main__':
         '--mid_exon_fusions', 
         action = 'store_true', 
         help = 'whether to add mid exon fusions')  
-#    parser.add_argument(
-#        '--me_event_prob', 
-#        default = 1.0, 
-#        help = 'Probability of mid exon breakage per exon',
-#        type = float,
-#        required=False)
-#    parser.add_argument(
-#        '--me_two_break_prob', 
-#        default = 0.5, 
-#        help = 'Probability of mid exon breakage on both sides of exon',
-#        type = float,
-#        required = False)
-#    parser.add_argument(
-#        '--me_left_break_prob', 
-#        default = 0.5, 
-#        help = 'Probability of mid exon breakage on left side of exon',
-#        type = float,
-#        required = False)
-#    parser.add_argument(
-#        '--me_min_bases_removed', 
-#        default = 1, 
-#        help = 'Min bases removed per mid-exon breakage',
-#        type = int,
-#        required = False)
-#    parser.add_argument(
-#        '--me_min_exon_size', 
-#        default = 1, 
-#        help = 'Probability of mid exon breakage on left side of exon',
-#        type = int,
-#        required = False)
+    parser.add_argument(
+        '--mid_exon_prob', 
+        default = 1.0, 
+        help = 'Probability of mid exon breakage per donor/acceptor',
+        type = float,
+        required = False)
+    parser.add_argument(
+        '--mid_exon_min_size', 
+        default = 1, 
+        help = 'Min exon size after mid-exon breakage',
+        type = int,
+        required = False)
+    parser.add_argument(
+        '--mid_exon_min_cleaved', 
+        default = 1, 
+        help = 'Min bases removed per mid-exon breakage',
+        type = int,
+        required = False)
+
     
     args = parser.parse_args()
     
@@ -137,7 +131,10 @@ if __name__ == '__main__':
                          args.gtf,
                          args.numEvents, 
                          args.simName,
-                         args.mid_exon_fusions)
+                         args.mid_exon_fusions,
+                         args.mid_exon_prob,
+                         args.mid_exon_min_size,
+                         args.mid_exon_min_cleaved)
                          
     makeFusionReference(fastaList = fastaFN, 
                         simName = args.simName, 
