@@ -6,6 +6,7 @@ import argparse
 import json
 import synapseclient
 import subprocess
+import random
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -21,8 +22,14 @@ if __name__ == "__main__":
     parser.add_argument("--bucket", default="gs://smc-rna-eval")
     parser.add_argument(
         "--dont_download_dip_genome", 
-        help = "don't download the diploid genome from bucket",
-        action = 'store_true')
+        help = "Don't download the diploid genome from bucket",
+        action = 'store_true',
+        required = False)
+    parser.add_argument(
+        "--set_seed", 
+        help = "Whether or not to add a seed parameter ", 
+        action = 'store_true', 
+        required = False)
     parser.add_argument(
         "--seed", 
         help = "Seed number to use for RSEM read simulation.", 
@@ -32,7 +39,8 @@ if __name__ == "__main__":
     parser.add_argument(
         '--mid_exon_fusions', 
         action = 'store_true', 
-        help = 'whether to add mid exon fusions')
+        help = 'whether to add mid exon fusions',
+        required = False)
         
     args = parser.parse_args()
     
@@ -77,8 +85,13 @@ if __name__ == "__main__":
         }
     }
     
-    if isinstance(args.seed, (int, long)):
-        job["SEED"] = args.seed
+    if args.set_seed:
+        if isinstance(args.seed, (int, long)):
+            seed = args.seed
+        else:
+            seed = random.randint(1, 1000000)
+        job["SEED"] = seed  
+    
     
     if args.mid_exon_fusions:
         job["MID_EXON_FUSIONS"] = True
