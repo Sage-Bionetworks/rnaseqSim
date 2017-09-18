@@ -60,8 +60,8 @@ def run_module(genome_file,
             print("fusion event after breakage")
             print(fusion_event)
             fObj = seqobjs.makeFusionSeqObj(
-                donorExonSeq = fusion_event.get_donor_exons(), 
-                acceptorExonSeq = fusion_event.get_acceptor_exons(),
+                donorExonSeq = fusion_event.get_donor_features(), 
+                acceptorExonSeq = fusion_event.get_acceptor_features(),
                 dJunc = fusion_event.get_donor_junction(),
                 aJunc = fusion_event.get_acceptor_junction(),
                 genomeObj = hg19)

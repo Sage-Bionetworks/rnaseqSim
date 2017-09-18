@@ -13,6 +13,9 @@ class FusionExon(object):
     def __init__(self, seq_feature):
         self.seq_feature = seq_feature
     
+    def get_seq_feature(self):
+        return(self.seq_feature)
+    
     def get_start(self):
         return(self.seq_feature.location.start)
     
