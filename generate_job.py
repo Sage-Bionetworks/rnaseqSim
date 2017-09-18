@@ -38,19 +38,19 @@ if __name__ == "__main__":
         default = None)
     parser.add_argument(
         '--mid_exon_prob', 
-        type = int, 
+        type = float, 
         help = 'probability to do mid exon fusions per strand',
         required = False,
         default = None)
     parser.add_argument(
         '--mid_exon_min_size', 
-        type = float, 
+        type = int, 
         help = 'minimum size of exon after cleaving',
         required = False,
         default = None)
     parser.add_argument(
         '--mid_exon_min_cleaved', 
-        type = float, 
+        type = int, 
         help = 'minimum amount cleaved off of exon',
         required = False,
         default = None)
