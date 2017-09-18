@@ -14,7 +14,6 @@ def run_module(genome_file,
                gtf_file, 
                numEvents, 
                simName, 
-               mid_exon_fusions,
                mid_exon_prob,
                mid_exon_min_size,
                mid_exon_min_cleaved,
@@ -54,8 +53,7 @@ def run_module(genome_file,
         for fusion_event in fusions.getRandomFusions(
             db = db, names = protein_coding_genes, num = numEvents):
             fusion_event.create_breakages(
-                mid_exon_fusions,  mid_exon_prob, mid_exon_min_size, 
-                mid_exon_min_cleaved)
+                mid_exon_prob, mid_exon_min_size, mid_exon_min_cleaved)
             fObj = seqobjs.makeFusionSeqObj(
                 donorExonSeq = fusion_event.get_donor_exons(), 
                 acceptorExonSeq = fusion_event.get_acceptor_exons(),
@@ -97,13 +95,13 @@ if __name__ == '__main__':
         required = False, 
         default = None)
     # mid exon fusion parameters ----------------------------------------------                  
-    parser.add_argument(
-        '--mid_exon_fusions', 
-        action = 'store_true', 
-        help = 'whether to add mid exon fusions')  
+#    parser.add_argument(
+#        '--mid_exon_fusions', 
+#        action = 'store_true', 
+#        help = 'whether to add mid exon fusions')  
     parser.add_argument(
         '--mid_exon_prob', 
-        default = 1.0, 
+        default = 0.0, 
         help = 'Probability of mid exon breakage per donor/acceptor',
         type = float,
         required = False)
@@ -131,7 +129,6 @@ if __name__ == '__main__':
                          args.gtf,
                          args.numEvents, 
                          args.simName,
-                         args.mid_exon_fusions,
                          args.mid_exon_prob,
                          args.mid_exon_min_size,
                          args.mid_exon_min_cleaved)
