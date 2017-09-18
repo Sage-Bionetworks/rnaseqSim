@@ -52,8 +52,13 @@ def run_module(genome_file,
     # TODO: Simplify return objects, possibly returning one event at a time instead of list
         for fusion_event in fusions.getRandomFusions(
             db = db, names = protein_coding_genes, num = numEvents):
+            
+            print("fusion event before breakage")
+            print(fusion_event)
             fusion_event.create_breakages(
                 mid_exon_prob, mid_exon_min_size, mid_exon_min_cleaved)
+            print("fusion event after breakage")
+            print(fusion_event)
             fObj = seqobjs.makeFusionSeqObj(
                 donorExonSeq = fusion_event.get_donor_exons(), 
                 acceptorExonSeq = fusion_event.get_acceptor_exons(),
@@ -61,6 +66,7 @@ def run_module(genome_file,
                 aJunc = fusion_event.get_acceptor_junction(),
                 genomeObj = hg19)
             print(len(fObj))
+            print(fObj)
             seqobjs.writeGTF(fObj,gtf)
             seqobjs.writeBEDPE(fObj,bedpe)
             SeqIO.write(fObj, ''.join([fObj.id,'.fasta']), "fasta")
