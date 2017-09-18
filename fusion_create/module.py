@@ -95,10 +95,6 @@ if __name__ == '__main__':
         required = False, 
         default = None)
     # mid exon fusion parameters ----------------------------------------------                  
-#    parser.add_argument(
-#        '--mid_exon_fusions', 
-#        action = 'store_true', 
-#        help = 'whether to add mid exon fusions')  
     parser.add_argument(
         '--mid_exon_prob', 
         default = 0.0, 
