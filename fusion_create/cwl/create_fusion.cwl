@@ -51,11 +51,25 @@ inputs:
       position: 1
       prefix: --seed
 
-  mid_exon_fusions:
-    type: ["null", boolean]
+  mid_exon_prob:
+    type: ["null", float]
     inputBinding:
       position: 1
-      prefix: --mid_exon_fusions
+      prefix: --mid_exon_prob
+
+  mid_exon_min_size:
+    type: ["null", int]
+    inputBinding:
+      position: 1
+      prefix: --mid_exon_min_size
+
+  mid_exon_min_cleaved:
+    type: ["null", int]
+    inputBinding:
+      position: 1
+      prefix: --mid_exon_min_cleaved
+
+
 
 outputs:
 
