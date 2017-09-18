@@ -27,6 +27,9 @@ class FusionEvent(object):
     def get_acceptor_junction(self):
         return(self.acceptor_exons.get_junction())
     
+    def __repr__(self):
+        return("FusionEvent(%r, %r)" % (self.donor_exons, self.acceptor_exons))
+    
     def create_breakages(self, 
                          mid_exon_prob = 0.0,
                          min_exon_min_size = 1, 

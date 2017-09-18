@@ -117,54 +117,6 @@ class TestFusionEvent(unittest.TestCase):
         self.assertEqual(self.FE2.get_donor_junction(), 1881) 
         self.assertEqual(self.FE2.get_acceptor_junction(), 18348) 
         self.setUp()
-    
-
-        
-        
-        
-                          
-
-
-    
-#    def test_create_breakage(self):
-#        # both strands are "-", donor gets cut off on left, acceptor on right
-#        random.seed(1)
-#        res1 = self.FE1.create_breakage("donor")
-#        self.assertEqual(res1[0], 799)
-#        self.assertEqual(res1[1], [self.exon2, self.exon3])
-#        random.seed(1)
-#        res2 = self.FE1.create_breakage("acceptor")
-#        self.assertEqual(res2[0], 14999)
-#        self.assertEqual(res2[1], [self.exon4])
-#        # both strands are "+", donor gets cut off on right, acceptor on left
-#        random.seed(1)
-#        res3 = self.FE2.create_breakage("donor")
-#        self.assertEqual(res3[0], 499)
-#        self.assertEqual(res3[1], [self.exon1])
-#        random.seed(4)
-#        res4 = self.FE2.create_breakage("acceptor")
-#        self.assertEqual(res4[0], 16999)
-#        self.assertEqual(res4[1], [self.exon5, self.exon6])
-#        
-#        # mid exon breakages
-#        random.seed(2)
-#        res5 = self.FE1.create_breakage("donor", 
-#                                        mid_exon_fusions = True, 
-#                                        mid_exon_prob = 1.0)
-#        self.assertEqual(res5[0], 1528)
-#        self.assertEqual(res5[1][0].location.start, ExactPosition(1529))
-#        self.assertEqual(res5[1][0].location.end, ExactPosition(2000))
-#        random.seed(2)
-#        res6 = self.FE1.create_breakage("acceptor", 
-#                                        mid_exon_fusions = True,
-#                                        mid_exon_prob = 1.0)
-#        self.assertEqual(res6[0], 22169)
-#        self.assertEqual(res6[1][0].location.start, ExactPosition(10000))
-#        self.assertEqual(res6[1][0].location.end, ExactPosition(15000))
-#        self.assertEqual(res6[1][1].location.start, ExactPosition(17000))
-#        self.assertEqual(res6[1][1].location.end, ExactPosition(20000))                 
-#        self.assertEqual(res6[1][2].location.start, ExactPosition(22000))
-#        self.assertEqual(res6[1][2].location.end, ExactPosition(22170))                             
-
+                     
 if __name__ == '__main__':
     unittest.main()

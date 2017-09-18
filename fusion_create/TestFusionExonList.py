@@ -179,7 +179,6 @@ class TestFusionEventList(unittest.TestCase):
         self.assertEqual(len(self.EXL3.exon_list), 1) 
         self.assertEqual(self.EXL3.exon_list[0].get_start(), 1500)
         self.setUp()
-        print(self.EXL1)
     
 if __name__ == '__main__':
     unittest.main()

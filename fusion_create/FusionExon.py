@@ -4,40 +4,42 @@ Created on Fri Sep 15 14:03:41 2017
 
 @author: aelamb
 """
-
-from Bio.SeqFeature import SeqFeature
 from Bio.SeqFeature import FeatureLocation
 from Bio.SeqFeature import ExactPosition
 import random
 
-class FusionExon(SeqFeature):
+class FusionExon(object):
     
     def __init__(self, seq_feature):
-        self.location = seq_feature.location
-        self.type = seq_feature.type
-        self.id = seq_feature.id
-        self.qualifiers = seq_feature.qualifiers
+        self.seq_feature = seq_feature
     
     def get_start(self):
-        return(self.location.start)
+        return(self.seq_feature.location.start)
     
     def get_end(self):
-        return(self.location.end)
+        return(self.seq_feature.location.end)
+    
+    def get_strand(self):
+        return(self.seq_feature.location.strand)
     
     def set_start(self, loc):
-        self.location = FeatureLocation(
+        self.seq_feature.location = FeatureLocation(
             ExactPosition(loc), 
-            self.location.end,
-            self.location.strand)
+            self.get_end(),
+            self.get_strand())
     
     def set_end(self, loc):
-        self.location = FeatureLocation(
-            self.location.start,
+        self.seq_feature.location = FeatureLocation(
+            self.get_start(),
             ExactPosition(loc), 
-            self.location.strand)
+            self.get_strand())
+    
+    def __repr__(self):
+        return(repr(self.seq_feature))
+        
             
     def is_breakable(self, exon_min_size, exon_min_cleaved):
-        exon_size = abs(self.location.start - self.location.end)
+        exon_size = abs(self.get_start() - self.get_end())
         min_exon_left = exon_size - exon_min_cleaved
         return(min_exon_left >= exon_min_size)
     

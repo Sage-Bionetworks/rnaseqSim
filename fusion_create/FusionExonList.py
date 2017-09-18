@@ -27,6 +27,10 @@ class FusionExonList(object):
     
     def __getitem__(self, position):
         return(self.exon_list[position])
+    
+    def __repr__(self):
+        return("FusionExonList(%r, %r, %r)" % 
+            (self.exon_list, self.direction, self.junction))
         
     def set_direction(self, strand, category):
         if ((category == "donor" and strand == "+") or 

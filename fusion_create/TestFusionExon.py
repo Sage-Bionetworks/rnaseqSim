@@ -57,7 +57,6 @@ class TestFusionEvent(unittest.TestCase):
         self.assertEqual(FEx.get_start(), 439)
         self.assertEqual(FEx.get_end(), 500)
         self.setUp()
-        
-    
+
 if __name__ == '__main__':
     unittest.main()
