@@ -16,10 +16,10 @@ class FusionEvent(object):
                                              "acceptor")
     
     def get_donor_exons(self):
-        return(self.donor_exons)
+        return(self.donor_exons.get_exon_list())
     
     def get_acceptor_exons(self):
-        return(self.acceptor_exons)
+        return(self.acceptor_exons.get_exon_list())
     
     def get_donor_junction(self):
         return(self.donor_exons.get_junction())

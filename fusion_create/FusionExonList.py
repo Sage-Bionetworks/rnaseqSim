@@ -15,6 +15,9 @@ class FusionExonList(object):
         self.exon_list = [FusionExon(exon) for exon in lst]
         self.set_direction(strand, category)
         self.junction = None
+        
+    def get_exon_list(self):
+        return(self.exon_list)
     
     def get_junction(self):
         return(self.junction)
