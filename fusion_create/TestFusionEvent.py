@@ -52,13 +52,13 @@ class TestFusionEvent(unittest.TestCase):
         self.FE2 = FusionEvent(self.sfs1, self.sfs2, "-", "+")
     
     def test_getters(self):
-        self.assertEqual(self.FE1.get_donor_exons().exon_list[0].get_start(), 
+        self.assertEqual(self.FE1.get_donor_exons()[0].get_start(), 
                          100)
-        self.assertEqual(self.FE1.get_donor_exons().exon_list[2].get_end(), 
+        self.assertEqual(self.FE1.get_donor_exons()[2].get_end(), 
                          2000)
-        self.assertEqual(self.FE1.get_acceptor_exons().exon_list[0].get_start(), 
+        self.assertEqual(self.FE1.get_acceptor_exons()[0].get_start(), 
                          10000)
-        self.assertEqual(self.FE1.get_acceptor_exons().exon_list[2].get_end(), 
+        self.assertEqual(self.FE1.get_acceptor_exons()[2].get_end(), 
                          25000)
         self.assertEqual(self.FE1.get_donor_junction(), None) 
         self.assertEqual(self.FE1.get_acceptor_junction(), None) 
@@ -67,24 +67,24 @@ class TestFusionEvent(unittest.TestCase):
         # no mid-exon breakages
         # donor strand  looses its last exon since it is on the + strand
         self.FE1.create_breakages()
-        self.assertEqual(len(self.FE1.get_donor_exons().exon_list), 2)
-        self.assertEqual(self.FE1.get_donor_exons().exon_list[0].get_start(), 
+        self.assertEqual(len(self.FE1.get_donor_exons()), 2)
+        self.assertEqual(self.FE1.get_donor_exons()[0].get_start(), 
                          100)
-        self.assertEqual(self.FE1.get_donor_exons().exon_list[0].get_end(), 
+        self.assertEqual(self.FE1.get_donor_exons()[0].get_end(), 
                          500)
-        self.assertEqual(self.FE1.get_donor_exons().exon_list[1].get_start(), 
+        self.assertEqual(self.FE1.get_donor_exons()[1].get_start(), 
                          800)
-        self.assertEqual(self.FE1.get_donor_exons().exon_list[1].get_end(), 
+        self.assertEqual(self.FE1.get_donor_exons()[1].get_end(), 
                          1000)
         # acceptor strand  looses its first exon since it is on the - strand          
-        self.assertEqual(len(self.FE1.get_acceptor_exons().exon_list), 2)
-        self.assertEqual(self.FE1.get_acceptor_exons().exon_list[0].get_start(), 
+        self.assertEqual(len(self.FE1.get_acceptor_exons()), 2)
+        self.assertEqual(self.FE1.get_acceptor_exons()[0].get_start(), 
                          17000)
-        self.assertEqual(self.FE1.get_acceptor_exons().exon_list[0].get_end(), 
+        self.assertEqual(self.FE1.get_acceptor_exons()[0].get_end(), 
                          20000)
-        self.assertEqual(self.FE1.get_acceptor_exons().exon_list[1].get_start(), 
+        self.assertEqual(self.FE1.get_acceptor_exons()[1].get_start(), 
                          22000)
-        self.assertEqual(self.FE1.get_acceptor_exons().exon_list[1].get_end(), 
+        self.assertEqual(self.FE1.get_acceptor_exons()[1].get_end(), 
                          25000)
         
         # junctions are -1 from the end/start of the last/first exons
@@ -96,21 +96,21 @@ class TestFusionEvent(unittest.TestCase):
         # donor strand  looses its first and last exon, and the start of its 
         # only exon breaks since it is on the - strand
         self.FE2.create_breakages(1.0)
-        self.assertEqual(len(self.FE2.get_donor_exons().exon_list), 1)
-        self.assertEqual(self.FE2.get_donor_exons().exon_list[0].get_start(), 
+        self.assertEqual(len(self.FE2.get_donor_exons()), 1)
+        self.assertEqual(self.FE2.get_donor_exons()[0].get_start(), 
                          1882)
-        self.assertEqual(self.FE2.get_donor_exons().exon_list[0].get_end(), 
+        self.assertEqual(self.FE2.get_donor_exons()[0].get_end(), 
                          2000)
         # acceptor strand  looses its first exon and break happens on  end of 
         # last exon since it is on the - strand
-        self.assertEqual(len(self.FE2.get_acceptor_exons().exon_list), 2)
-        self.assertEqual(self.FE2.get_acceptor_exons().exon_list[0].get_start(), 
+        self.assertEqual(len(self.FE2.get_acceptor_exons()), 2)
+        self.assertEqual(self.FE2.get_acceptor_exons()[0].get_start(), 
                          10000)
-        self.assertEqual(self.FE2.get_acceptor_exons().exon_list[0].get_end(), 
+        self.assertEqual(self.FE2.get_acceptor_exons()[0].get_end(), 
                          15000)
-        self.assertEqual(self.FE2.get_acceptor_exons().exon_list[1].get_start(), 
+        self.assertEqual(self.FE2.get_acceptor_exons()[1].get_start(), 
                          17000)
-        self.assertEqual(self.FE2.get_acceptor_exons().exon_list[1].get_end(), 
+        self.assertEqual(self.FE2.get_acceptor_exons()[1].get_end(), 
                          18349)
         
         # junctions are -1 from the end/start of the last/first exons
