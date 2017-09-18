@@ -21,7 +21,13 @@ class FusionExonList(object):
     
     def get_junction(self):
         return(self.junction)
+        
+    def __len__(self):
+        return(len(self.exon_list))
     
+    def __getitem__(self, position):
+        return(self.exon_list[position])
+        
     def set_direction(self, strand, category):
         if ((category == "donor" and strand == "+") or 
             (category == "acceptor" and strand == "-")):
@@ -46,11 +52,10 @@ class FusionExonList(object):
 
     def get_possible_junction_exons(self, allow_mid_exon, exon_min_size, 
                                     exon_min_cleaved):
-        idx_range = range(0, len(self.exon_list))
+        idx_range = range(0, len(self))
         if allow_mid_exon:
             idx_lst = [idx for idx in idx_range if 
-                self.exon_list[idx].is_breakable(exon_min_size, 
-                                                 exon_min_cleaved)]
+                self[idx].is_breakable(exon_min_size, exon_min_cleaved)]
             if len(idx_lst) == 0:
                 allow_mid_exon = False
         if not allow_mid_exon:
@@ -62,13 +67,13 @@ class FusionExonList(object):
     
     def create_mid_exon_breakage(self, junction_exon_n, exon_min_size, 
                                  exon_min_cleaved):
-        junc_exon = self.exon_list[junction_exon_n]
+        junc_exon = self[junction_exon_n]
         self.slice_exons_at_fusion_exon(junction_exon_n)
         self.junction = junc_exon.break_exon_at_junction(
             exon_min_size, exon_min_cleaved, self.direction) - 1
     
     def create_exon_breakage(self, junction_exon_n):
-        junc_exon = self.exon_list[junction_exon_n]
+        junc_exon = self[junction_exon_n]
         self.slice_exons_at_fusion_exon(junction_exon_n)
         if self.direction == "forward":
             junction = junc_exon.get_end()
@@ -78,6 +83,6 @@ class FusionExonList(object):
         
     def slice_exons_at_fusion_exon(self, junction_exon_n):
         if self.direction == "forward":
-            self.exon_list = self.exon_list[:junction_exon_n + 1]
+            self.exon_list = self[:junction_exon_n + 1]
         else:
-            self.exon_list = self.exon_list[junction_exon_n:]         
+            self.exon_list = self[junction_exon_n:]         
