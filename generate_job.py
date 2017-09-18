@@ -37,10 +37,23 @@ if __name__ == "__main__":
         required = False, 
         default = None)
     parser.add_argument(
-        '--mid_exon_fusions', 
-        action = 'store_true', 
-        help = 'whether to add mid exon fusions',
-        required = False)
+        '--mid_exon_prob', 
+        type = int, 
+        help = 'probability to do mid exon fusions per strand',
+        required = False,
+        default = None)
+    parser.add_argument(
+        '--mid_exon_min_size', 
+        type = float, 
+        help = 'minimum size of exon after cleaving',
+        required = False,
+        default = None)
+    parser.add_argument(
+        '--mid_exon_min_cleaved', 
+        type = float, 
+        help = 'minimum amount cleaved off of exon',
+        required = False,
+        default = None)
         
     args = parser.parse_args()
     
@@ -93,8 +106,14 @@ if __name__ == "__main__":
         job["SEED"] = seed  
     
     
-    if args.mid_exon_fusions:
-        job["MID_EXON_FUSIONS"] = True
+    if isinstance(args.mid_exon_prob, (float, long)):
+        job["MID_EXON_PROB"] = args.mid_exon_prob
+    
+    if isinstance(args.mid_exon_min_size, (int, long)):
+        job["MID_EXON_MIN_SIZE"] = args.mid_exon_min_size
+    
+    if isinstance(args.mid_exon_min_cleaved, (int, long)):
+        job["MID_EXON_MIN_CLEAVED"] = args.mid_exon_min_cleaved
 
     input_path = os.path.join(args.inputDir, "input.json")
     with open(input_path, "w") as handle:
