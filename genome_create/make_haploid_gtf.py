@@ -7,8 +7,8 @@ import sys
 import argparse
 
 parser = argparse.ArgumentParser(description='Adds suffix to chrom ids, gene ids, and transcript ids in input GTF to facilitate creation of diploid genome.')
-parser.add_argument('GTF', help='GTF input file.')
-parser.add_argument('suffix', help='Suffix label to add, e.g. "hap1"')
+parser.add_argument('--GTF', help='GTF input file.')
+parser.add_argument('--suffix', help='Suffix label to add, e.g. "hap1"')
 args = parser.parse_args()
 
 
