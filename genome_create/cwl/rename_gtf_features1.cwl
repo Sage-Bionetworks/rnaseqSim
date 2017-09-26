@@ -1,10 +1,16 @@
 #!/usr/bin/env cwl-runner
+#
+# Authors: Andrew Lamb
 
 cwlVersion: v1.0
 class: CommandLineTool
 baseCommand: [make_haploid_gtf.py]
 
 doc: "Changing gene, transcript, and chromosome names in GTF"
+
+hints:
+  DockerRequirement:
+    dockerPull: andrewelambsage/rnaseqsim
 
 hints:
   DockerRequirement:

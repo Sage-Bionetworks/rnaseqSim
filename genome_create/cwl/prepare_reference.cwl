@@ -1,4 +1,6 @@
 #!/usr/bin/env cwl-runner
+#
+# Authors: Andrew Lamb
 
 cwlVersion: v1.0
 class: CommandLineTool
@@ -8,7 +10,7 @@ doc: "Create diploid reference files"
 
 hints:
   DockerRequirement:
-    dockerPull: rnaseqsim
+    dockerPull: andrewelambsage/rnaseqsim
 
 inputs:
 
