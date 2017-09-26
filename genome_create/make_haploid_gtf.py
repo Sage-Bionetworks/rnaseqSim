@@ -13,13 +13,13 @@ args = parser.parse_args()
 
 
 with open(args.GTF, 'r') as gtf:
-	for line in gtf:
-		if not line.startswith('#'):
-			main_vals = line.strip().split('\t')
-			main_vals[0] = '-'.join([main_vals[0], args.suffix])
-			if not len(main_vals) == 9:
+    for line in gtf:
+        if not line.startswith('#'):
+            main_vals = line.strip().split('\t')
+            main_vals[0] = '-'.join([main_vals[0], args.suffix])
+            if not len(main_vals) == 9:
 				print '%s\n' % len(main_vals)
-			else:
+            else:
 				attributes = main_vals.pop().strip().split(';')
 #				attributes = main_vals[8].strip().split(';')
 				for i in range(len(attributes)):
@@ -31,11 +31,11 @@ with open(args.GTF, 'r') as gtf:
 						transcript = attributes[i].split()
 						transcript[1] = '-'.join([transcript[1].rstrip('"'), args.suffix+'"'])
 						attributes[i] = ' '.join(transcript)
-			first_part = '\t'.join(main_vals)
-			second_part = '; '.join(attributes)
-			print '%s\t%s' % (first_part, second_part)
-		else:
-			print line.strip()
+            first_part = '\t'.join(main_vals)
+            second_part = '; '.join(attributes)
+            print '%s\t%s' % (first_part, second_part)
+        else:
+            print line.strip()
 
 
 
