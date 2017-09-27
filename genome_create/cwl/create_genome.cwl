@@ -11,7 +11,7 @@ doc: "Create genome"
 
 hints:
   DockerRequirement:
-    dockerPull: andrewelambsage/rnaseqsim
+    dockerPull: andrewlambsage/rnaseqsim
 
 requirements:
   - class: InlineJavascriptRequirement

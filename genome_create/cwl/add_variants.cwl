@@ -10,7 +10,7 @@ doc: "Add variants to fasta files"
 
 hints:
   DockerRequirement:
-    dockerPull: rnaseqsim
+    dockerPull: andrewlamb/rnaseqsim
 
 requirements:
   - class: InlineJavascriptRequirement

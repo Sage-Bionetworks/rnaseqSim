@@ -32,26 +32,26 @@ outputs:
 steps:
 
   copy_genome:
-    run: ../../genome_create/cwl/copy_genome.cwl
+    run: ../genome_create/cwl/copy_genome.cwl
     in: 
       input_fasta: INPUT_HAPLOID_FILE
       output_fasta_name: HAPOLID_COPY_NAME
     out: [output_fasta]
 
   index_vcf1:
-    run: ../../genome_create/cwl/index_vcf.cwl
+    run: ../genome_create/cwl/index_vcf.cwl
     in: 
       input_vcf: INPUT_VCF_FILE1
     out: [output_index]
 
   index_vcf2:
-    run: ../../genome_create/cwl/index_vcf.cwl
+    run: ../genome_create/cwl/index_vcf.cwl
     in: 
       input_vcf: INPUT_VCF_FILE2
     out: [output_index]
 
   add_variants1:
-    run: ../../genome_create/cwl/add_variants.cwl
+    run: ../genome_create/cwl/add_variants.cwl
     in: 
       input_fasta: INPUT_HAPLOID_FILE
       output_fasta_name: VARIANT_HAPLOID_FILE1
@@ -59,7 +59,7 @@ steps:
     out: [output_fasta]
 
   add_variants2:
-    run: ../../genome_create/cwl/add_variants.cwl
+    run: ../genome_create/cwl/add_variants.cwl
     in: 
       input_fasta: copy_genome/output_fasta
       output_fasta_name: VARIANT_HAPLOID_FILE2
@@ -67,49 +67,49 @@ steps:
     out: [output_fasta]
 
   rename_fasta_features1:
-    run: ../../genome_create/cwl/rename_fasta_features1.cwl
+    run: ../genome_create/cwl/rename_fasta_features1.cwl
     in: 
       input_string: SED_STRING1
       input_fasta: add_variants1/output_fasta
     out: [output_fasta]
 
   rename_fasta_features2:
-    run: ../../genome_create/cwl/rename_fasta_features2.cwl
+    run: ../genome_create/cwl/rename_fasta_features2.cwl
     in: 
       input_string: SED_STRING2
       input_fasta: add_variants2/output_fasta
     out: [output_fasta]
 
   combine_fastas:
-    run: ../../genome_create/cwl/combine_fastas.cwl
+    run: ../genome_create/cwl/combine_fastas.cwl
     in: 
       input_fasta1: rename_fasta_features1/output_fasta
       input_fasta2: rename_fasta_features2/output_fasta
     out: [output_fasta]
 
   rename_gtf_features1:
-    run: ../../genome_create/cwl/rename_gtf_features1.cwl
+    run: ../genome_create/cwl/rename_gtf_features1.cwl
     in: 
       input_string: GTF_SUFFIX_STRING1
       input_gtf: INPUT_GTF_FILE
     out: [output_gtf]
 
   rename_gtf_features2:
-    run: ../../genome_create/cwl/rename_gtf_features2.cwl
+    run: ../genome_create/cwl/rename_gtf_features2.cwl
     in: 
       input_string: GTF_SUFFIX_STRING2
       input_gtf: INPUT_GTF_FILE
     out: [output_gtf]
 
   combine_gtfs:
-    run: ../../genome_create/cwl/combine_gtfs.cwl
+    run: ../genome_create/cwl/combine_gtfs.cwl
     in: 
       input_gtf1: rename_gtf_features1/output_gtf
       input_gtf2: rename_gtf_features2/output_gtf
     out: [output_gtf]
   
   prepare_reference:
-    run: ../../genome_create/cwl/prepare_reference.cwl
+    run: ../genome_create/cwl/prepare_reference.cwl
     in: 
       input_gtf: combine_gtfs/output_gtf
       input_fasta: combine_fastas/output_fasta
@@ -117,7 +117,7 @@ steps:
     out: [output_files]
 
   tar_create:
-    run: ../../genome_create/cwl/tar_create.cwl
+    run: ../genome_create/cwl/tar_create.cwl
     in: 
       files: prepare_reference/output_files
     out: [archive]
