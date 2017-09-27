@@ -35,7 +35,7 @@ RUN wget https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz && \
 RUN git clone --branch genome_workflow https://github.com/andrewelambsage/rnaseqSim/ && \
     chmod +x /opt/rnaseqSim/fusion_create/*.py* && \
     chmod +x /opt/rnaseqSim/model_isoforms/*.R && \
-    chmod +x /opt/rnaseqSim/fastq_create/*.py
+    chmod +x /opt/rnaseqSim/fastq_create/*.py && \
     chmod +x /opt/rnaseqSim/genome_create/*.py
 
 ENV PATH /opt/rnaseqSim/fusion_create:$PATH
