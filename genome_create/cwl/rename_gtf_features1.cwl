@@ -12,10 +12,6 @@ hints:
   DockerRequirement:
     dockerPull: andrewlambsage/rnaseqsim:gw
 
-hints:
-  DockerRequirement:
-    dockerPull: rnaseqsim
-
 stdout: haploid1.gtf
 
 inputs:
