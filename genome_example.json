@@ -1,0 +1,26 @@
+{
+    "INPUT_HAPLOID_FILE": {
+        "path": "Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz", 
+        "class": "File"
+    }, 
+    "HAPOLID_COPY_NAME": "Homo_sapiens.GRCh37.75.dna.primary_assembly.fa2.gz",
+    "INPUT_VCF_FILE1": {
+        "path": "clinvar_20170905.vcf.gz", 
+        "class": "File"
+    },  
+    "INPUT_VCF_FILE2": {
+        "path": "clinvar_20170905.vcf2.gz", 
+        "class": "File"
+    },  
+    "VARIANT_HAPLOID_FILE1": "test_haploid1.fasta",
+    "VARIANT_HAPLOID_FILE2": "test_haploid2.fasta",
+    "SED_STRING1": "s/>\\([[:graph:]]*\\)\\s/>\\1-hap1 /g",
+    "SED_STRING2": "s/>\\([[:graph:]]*\\)\\s/>\\1-hap2 /g",
+    "INPUT_GTF_FILE": {
+        "path": "Homo_sapiens.GRCh37.75.gtf", 
+        "class": "File"
+    },
+    "GTF_SUFFIX_STRING1": "hap1",
+    "GTF_SUFFIX_STRING2": "hap2",
+    "REF_NAME": "GRCH37_diploid"
+}
