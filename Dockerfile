@@ -13,8 +13,14 @@ RUN Rscript -e "install.packages('data.table')"
 
 RUN pip install argparse synapseclient numpy gffutils biopython
 
-
 WORKDIR /opt
+
+RUN wget https://github.com/samtools/bcftools/releases/download/1.5/bcftools-1.5.tar.bz2 -O bcftools.tar.bz2 && \
+    tar -xjvf bcftools.tar.bz2 &&\
+    cd bcftools-1.5 && \
+    make && \
+    make prefix=/usr/local/bin install && \
+    ln -s /usr/local/bin/bin/bcftools /usr/bin/bcftools
  
 RUN wget https://github.com/deweylab/RSEM/archive/v1.2.31.tar.gz && \
     tar -zxvf v1.2.31.tar.gz && \
@@ -29,7 +35,7 @@ RUN wget https://github.com/alexdobin/STAR/archive/STAR_2.4.2a.tar.gz && \
 RUN git clone --branch genome_workflow https://github.com/andrewelambsage/rnaseqSim/ && \
     chmod +x /opt/rnaseqSim/fusion_create/*.py* && \
     chmod +x /opt/rnaseqSim/model_isoforms/*.R && \
-    chmod +x /opt/rnaseqSim/fastq_create/*.py && \
+    chmod +x /opt/rnaseqSim/fastq_create/*.py
     chmod +x /opt/rnaseqSim/genome_create/*.py
 
 ENV PATH /opt/rnaseqSim/fusion_create:$PATH
