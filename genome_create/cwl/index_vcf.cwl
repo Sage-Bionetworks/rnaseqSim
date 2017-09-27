@@ -10,7 +10,7 @@ doc: "Index VCF file"
 
 hints:
   DockerRequirement:
-    dockerPull: andrewlambsage/rnaseqsim
+    dockerPull: andrewlambsage/rnaseqsim:gw
 
 requirements:
   - class: InlineJavascriptRequirement

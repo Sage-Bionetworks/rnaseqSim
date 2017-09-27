@@ -10,7 +10,7 @@ doc: "Changing gene, transcript, and chromosome names in GTF"
 
 hints:
   DockerRequirement:
-    dockerPull: andrewlambsage/rnaseqsim
+    dockerPull: andrewlambsage/rnaseqsim:gw
 
 hints:
   DockerRequirement:

@@ -10,7 +10,7 @@ doc: "Create diploid reference files"
 
 hints:
   DockerRequirement:
-    dockerPull: andrewlambsage/rnaseqsim
+    dockerPull: andrewlambsage/rnaseqsim:gw
 
 inputs:
 
