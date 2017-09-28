@@ -26,8 +26,10 @@ inputs:
 
 outputs:
   OUTPUT:
-    type: File
-    outputSource: tar_create/archive
+    type:
+      type: array
+      items: File
+    outputSource: [tar_create/archive, combine_gtfs/output_gtf, combine_fastas/output_fasta]  
  
 steps:
 
