@@ -12,6 +12,9 @@ hints:
   DockerRequirement:
     dockerPull: andrewlambsage/rnaseqsim:gw
 
+requirements:
+  - class: InlineJavascriptRequirement
+
 inputs:
 
   input_gtf:
