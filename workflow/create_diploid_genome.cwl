@@ -115,9 +115,9 @@ steps:
     run: ../genome_create/cwl/prepare_reference.cwl
     in: 
       input_gtf: combine_gtfs/output_gtf
+      num_cores: NUM_CORES
       input_fasta: combine_fastas/output_fasta
       ref_name: REF_NAME
-      num_cores: NUM_CORES
     out: [output_files]
 
   tar_create:

@@ -24,7 +24,7 @@ inputs:
       prefix: --gtf
 
   num_cores:
-    type: File
+    type: int
     inputBinding:
       position: 2
       prefix: --num-threads
