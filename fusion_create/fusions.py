@@ -1,6 +1,7 @@
 import random
+from FusionEvent import FusionEvent
 #import time
-import gffutils
+#import gffutils
 from gffutils import biopython_integration
 
 MAX_TOSS_NUM = 100
@@ -37,6 +38,18 @@ def getJunctionAtExonBoundary(db, tranId, strand, isDonor):
         return True,exons[eId].start,fusExons     #gffutils is 1-based
     else:
         return False,999,999
+
+def getExons(db, tranId):
+# TODO: figure out why this is sometimes returning empty lists    
+    exons = []
+    result =  db.children(tranId, featuretype = 'exon', order_by = 'start')
+    for item in result:
+        exons.append(item)
+    if len(exons) < 2:
+        return(False, None)
+    else:
+        return(True, exons)
+
 
 
 def isStay(pStay):
@@ -90,20 +103,21 @@ def getRandomFusions(db, names, num=5, pStay=0.0):
             aStrand,aTran = getTranscript(db, aGene)
             if (dTran is None) or (aTran is None): continue
             # Choose junctions
-            dIsSucess,dJunction,dExons = getJunctionAtExonBoundary(db, dTran, dStrand, True)
-            aIsSucess,aJunction,aExons = getJunctionAtExonBoundary(db, aTran, aStrand, False)             
+            dIsSucess,dExons = getExons(db, dTran)
+            aIsSucess,aExons = getExons(db, aTran)             
             if dIsSucess and aIsSucess:
                 dExonSF = list()
                 aExonSF = list()
                 for exon in dExons:
-                   dExonSF.append(biopython_integration.to_seqfeature(exon))
+                    dExonSF.append(biopython_integration.to_seqfeature(exon))
                 for exon in aExons:
-                   aExonSF.append(biopython_integration.to_seqfeature(exon))
+                    aExonSF.append(biopython_integration.to_seqfeature(exon))
                 if (len(dExonSF) > 0) and (len(aExonSF) > 0):
-                	# adjust junction positions to be 0-based
-                   res.append({'donorExons':dExonSF,'acceptorExons':aExonSF,'dJunction':dJunction-1,'aJunction':aJunction-1})
-                
-                   total = total + 1
+                    # create fusion event object, and adjust junction positions 
+                    # to be 0-based
+                    fus = FusionEvent(dExonSF, aExonSF, dStrand, aStrand)
+                    res.append(fus)
+                    total = total + 1
             else:            
                tossed2 = tossed2  + 1
                if tossed2 > MAX_TOSS_NUM:

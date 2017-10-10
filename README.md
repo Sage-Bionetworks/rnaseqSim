@@ -23,7 +23,7 @@ The input JSON needs the fields:
 
 And can use the optional fields
   SEED: ["null", int]
-
+  MID_EXON_FUSIONS: ["null", boolean]
 
 ## Description of inputs
 
@@ -36,9 +36,11 @@ EXPRESSION_PROFILE:
 RSEM_MODEL:
 DIP_GENOME:
 
-SEED: This is optional. If given all scripts with a random element in the 
+SEED: (optional) If given all scripts with a random element in the 
 workflow will have a seed set at the given integer.
 
+MID_EXON_FUSIONS: (optional) If set to true, fusions will happen in the middle 
+of exons
 
 ## Description of outputs
 
@@ -50,7 +52,7 @@ workflow will have a seed set at the given integer.
 
 [SIM_NAME]_mergeSort_2.fq.gz:
 
-archive.tgz: This will store other intermeduate files if 
+archive.tgz: This will store other intermediate files if 
 `fusion_simulation_workflow_all.cwl`was used.
 
 

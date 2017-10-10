@@ -19,6 +19,9 @@ inputs:
   RSEM_MODEL: File
   DIP_GENOME: File
   SEED: ["null", int]
+  MID_EXON_PROB: ["null", float]
+  MID_EXON_MIN_SIZE: ["null", int]
+  MID_EXON_MIN_CLEAVED: ["null", int]
 
 outputs:
   OUTPUT:
@@ -51,8 +54,11 @@ steps:
       numEvents: NUM_EVENTS
       simName: SIM_NAME
       seed: SEED
+      mid_exon_prob: MID_EXON_PROB
+      mid_exon_min_size: MID_EXON_MIN_SIZE
+      mid_exon_min_cleaved: MID_EXON_MIN_CLEAVED
 
-    out: [fusGTF, fusRef, fusionTruth]
+    out: [fusGTF, fusRef, fusionTruth, fusLog, fusFA]
 
   isoform:
     run: ../model_isoforms/cwl/model_isoforms.cwl
@@ -77,14 +83,23 @@ steps:
       isoformLog: isoform/isoformLog
       seed: SEED
 
-    out: [isoformTruth, fastq1, fastq2] 
+    out: [isoformTruth, fastq1, fastq2, dip_gene_results, dip_iso_results, fus_gene_results, fus_iso_results, key1, key2] 
 
   archive:
     run: ../general_tools/tar_create.cwl
     in:
-      fusion_gtf_file: fusion/fusGTF
-      fusion_ref_file: fusion/fusRef
-      
+      fusion_log_file: fusion/fusLog
+      fusion_FA_files: fusion/fusFA
+      isoformTPM: isoform/isoformTPM
+      fusionTPM: isoform/fusionTPM
+      isoform_log_file: isoform/isoformLog
+      dip_gene_results: reads/dip_gene_results
+      dip_iso_results: reads/dip_iso_results
+      fus_gene_results: reads/fus_gene_results
+      fus_iso_results: reads/fus_iso_results
+      key1: reads/key1
+      key2: reads/key2
+
+
+
     out: [archive] 
-
-

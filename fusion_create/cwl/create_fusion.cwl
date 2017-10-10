@@ -11,10 +11,13 @@ hints:
     dockerPull: alliecreason/rnaseqsim
 
 requirements:
+  - class: MultipleInputFeatureRequirement
   - class: InlineJavascriptRequirement
   - class: ResourceRequirement
     coresMin: 
     ramMin: 
+
+stdout: fus.log
 
 inputs:
 
@@ -48,6 +51,26 @@ inputs:
       position: 1
       prefix: --seed
 
+  mid_exon_prob:
+    type: ["null", float]
+    inputBinding:
+      position: 1
+      prefix: --mid_exon_prob
+
+  mid_exon_min_size:
+    type: ["null", int]
+    inputBinding:
+      position: 1
+      prefix: --mid_exon_min_size
+
+  mid_exon_min_cleaved:
+    type: ["null", int]
+    inputBinding:
+      position: 1
+      prefix: --mid_exon_min_cleaved
+
+
+
 outputs:
 
   fusionTruth:
@@ -60,6 +83,16 @@ outputs:
     outputBinding:
       glob: $(inputs.simName + ".gtf")
 
+  fusLog:
+    type: stdout
+
+  fusFA:
+    type:
+      type: array
+      items: File
+    outputBinding:
+      glob: "*.fasta"
+
   fusRef:
     type: File
     outputBinding:
@@ -68,7 +101,6 @@ outputs:
      - ^.chrlist
      - ^.grp
      - ^.idx.fa
-     - ^Log.out
      - ^.n2g.idx.fa
      - ^.ti
      - ^.transcripts.fa

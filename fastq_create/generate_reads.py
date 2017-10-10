@@ -179,11 +179,9 @@ if __name__=="__main__":
     parser.add_argument("--seed", help="Seed number to use for RSEM read simulation.", type=int, required=False, default = None)
     args = parser.parse_args()
  
-     # set seed to seed arument, otherwise to time
+     # set seed to seed arument
     if isinstance(args.seed, (int, long)):
         random.seed(args.seed)
-    else:
-        random.seed(time.time)
         
     ## Wrap jobs
     numSimReads=parseIsoformLog(isoformLog=args.isoformLog)

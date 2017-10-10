@@ -1,1 +1,4 @@
 *.pyc
+*/cwl/*2.cwl
+*/*2.cwl
+docker_testing/*

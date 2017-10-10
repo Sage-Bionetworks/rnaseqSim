@@ -19,6 +19,9 @@ inputs:
   RSEM_MODEL: File
   DIP_GENOME: File
   SEED: ["null", int]
+  MID_EXON_PROB: ["null", float]
+  MID_EXON_MIN_SIZE: ["null", int]
+  MID_EXON_MIN_CLEAVED: ["null", int]
 
 outputs:
   OUTPUT:
@@ -45,12 +48,15 @@ steps:
 
   fusion:
     run: ../fusion_create/cwl/create_fusion.cwl
-    in:
+        in:
       gtf: GTF
       genome: gunzip/output
       numEvents: NUM_EVENTS
       simName: SIM_NAME
       seed: SEED
+      mid_exon_prob: MID_EXON_PROB
+      mid_exon_min_size: MID_EXON_MIN_SIZE
+      mid_exon_min_cleaved: MID_EXON_MIN_CLEAVED
 
     out: [fusGTF, fusRef, fusionTruth]
 
