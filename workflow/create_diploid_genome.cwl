@@ -23,6 +23,7 @@ inputs:
   GTF_SUFFIX_STRING1: string
   GTF_SUFFIX_STRING2: string
   REF_NAME: string
+  NUM_CORES: int
 
 outputs:
   OUTPUT:
@@ -116,6 +117,7 @@ steps:
       input_gtf: combine_gtfs/output_gtf
       input_fasta: combine_fastas/output_fasta
       ref_name: REF_NAME
+      num_cores: NUM_CORES
     out: [output_files]
 
   tar_create:

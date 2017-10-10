@@ -23,15 +23,21 @@ inputs:
       position: 1
       prefix: --gtf
 
-  input_fasta:
+  num_cores:
     type: File
     inputBinding:
       position: 2
+      prefix: --num-threads
+
+  input_fasta:
+    type: File
+    inputBinding:
+      position: 3
   
   ref_name:
     type: string
     inputBinding:
-      position: 3
+      position: 4
 
 outputs:
 

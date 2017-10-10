@@ -22,5 +22,6 @@
     },
     "GTF_SUFFIX_STRING1": "hap1",
     "GTF_SUFFIX_STRING2": "hap2",
-    "REF_NAME": "GRCH37_diploid"
+    "REF_NAME": "GRCH37_diploid",
+    "NUM_CORES": 8
 }
