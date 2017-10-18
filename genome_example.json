@@ -5,11 +5,11 @@
     }, 
     "HAPOLID_COPY_NAME": "Homo_sapiens.GRCh37.75.dna.primary_assembly.fa2.gz",
     "INPUT_VCF_FILE1": {
-        "path": "clinvar_20170905.vcf.gz", 
+        "path": "", 
         "class": "File"
     },  
     "INPUT_VCF_FILE2": {
-        "path": "clinvar_20170905.vcf2.gz", 
+        "path": "", 
         "class": "File"
     },  
     "VARIANT_HAPLOID_FILE1": "test_haploid1.fasta",
@@ -23,5 +23,5 @@
     "GTF_SUFFIX_STRING1": "hap1",
     "GTF_SUFFIX_STRING2": "hap2",
     "REF_NAME": "GRCH37_diploid",
-    "NUM_CORES": 8
+    "NUM_CORES": 1
 }
