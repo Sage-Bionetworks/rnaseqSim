@@ -41,9 +41,43 @@ inputs:
 
 outputs:
 
-  output_files:
-    type:
-      type: array
-      items: File
+  output_chrlist:
+    type: File
     outputBinding:
-      glob: $(inputs.ref_name + "*")
+      glob: $(inputs.ref_name + ".chrlist")
+
+  output_grp:
+    type: File
+    outputBinding:
+      glob: $(inputs.ref_name + ".grp")
+
+  output_Log.out:
+    type: File
+    outputBinding:
+      glob: $(inputs.ref_name + "Log.out")
+
+  output_n2g.idx.fa:
+    type: File
+    outputBinding:
+      glob: $(inputs.ref_name + ".n2g.idx.fa")
+
+  output_idx.fa:
+    type: File
+    outputBinding:
+      glob: $(inputs.ref_name + ".idx.fa")
+
+  output_seq:
+    type: File
+    outputBinding:
+      glob: $(inputs.ref_name + ".seq")
+
+  output_ti:
+    type: File
+    outputBinding:
+      glob: $(inputs.ref_name + ".ti")
+
+  output_transcripts.fa:
+    type: File
+    outputBinding:
+      glob: $(inputs.ref_name + ".transcripts.fa")
+

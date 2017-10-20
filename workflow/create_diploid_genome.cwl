@@ -118,10 +118,17 @@ steps:
       num_cores: NUM_CORES
       input_fasta: combine_fastas/output_fasta
       ref_name: REF_NAME
-    out: [output_files]
+    out: [output_chrlist, output_grp, output_Log.out, output_n2g.idx.fa, output_idx.fa, output_seq, output_ti, output_transcripts.fa]
 
   tar_create:
     run: ../genome_create/cwl/tar_create.cwl
     in: 
-      files: prepare_reference/output_files
+      input_chrlist: prepare_reference/output_chrlist
+      input_grp: prepare_reference/output_grp
+      input_Log.out: prepare_reference/output_Log.out
+      input_n2g.idx.fa: prepare_reference/output_n2g.idx.fa
+      input_idx.fa: prepare_reference/output_idx.fa
+      input_seq: prepare_reference/output_seq
+      input_ti: prepare_reference/output_ti
+      input_transcripts.fa: prepare_reference/output_transcripts.fa
     out: [archive]
