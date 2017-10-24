@@ -4,7 +4,7 @@
 
 cwlVersion: v1.0
 class: CommandLineTool
-baseCommand: [tar, cvzf, genome.tgz]
+baseCommand: [tar, cvzfh, genome.tgz]
 
 doc: "command line: tar"
 
