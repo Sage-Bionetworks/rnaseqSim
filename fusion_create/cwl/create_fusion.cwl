@@ -8,7 +8,7 @@ doc: "Create fusion events"
 
 hints:
   DockerRequirement:
-    dockerPull: alliecreason/rnaseqsim
+    dockerPull: andrewelambsage/rnaseqsim
 
 requirements:
   - class: MultipleInputFeatureRequirement

@@ -48,7 +48,7 @@ steps:
 
   fusion:
     run: ../fusion_create/cwl/create_fusion.cwl
-        in:
+    in:
       gtf: GTF
       genome: gunzip/output
       numEvents: NUM_EVENTS
